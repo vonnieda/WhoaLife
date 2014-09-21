@@ -25,6 +25,7 @@ app.post('/emails', function(req, res, next) {
     });
     req.busboy.on('finish', function() {
         console.log(fields);
+        console.log(fields.text);
         res.status(200).end();
     });
 });
