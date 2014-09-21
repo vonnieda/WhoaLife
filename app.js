@@ -6,7 +6,8 @@ var express = require('express'),
     db = require('monk')(process.env.MONGOHQ_URL),
     entries = db.get('entries'),
     jwt = require('jsonwebtoken'),
-    expressJwt = require('express-jwt');
+    expressJwt = require('express-jwt'),
+    sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
 
 var app = express();
 
@@ -30,21 +31,30 @@ app.get('/entries', function(req, res, next) {
 });
 
 app.post('/emails', function(req, res, next) {
-    console.log(req.body);
     var fields = {};
     req.busboy.on('field', function(field, value) {
         fields[field] = value;
     });
     req.busboy.on('finish', function() {
-        console.log(fields);
-        // fields.text is newline formatted text
         var doc = {
             createdAt : new Date(),
-            text : fields.text
+            text : fields.plain
         };
         entries.insert(doc);
         res.status(200).end();
     });
+});
+
+sendgrid.send({
+    to:       '"Jason von Nieda" <jason@vonnieda.org>',
+    from:     '"WhoaLife" <' + process.env.CLOUDMAILIN_FORWARD_ADDRESS + '>',
+    subject:  'It\'s Friday, Sep 19 - How did your day go?',
+    text:     'Just reply to this email with your entry.'
+}, function(err, json) {
+    if (err) {
+        return console.error(err);
+    }
+    console.log(json);
 });
 
 module.exports = app;
