@@ -52,16 +52,20 @@ app.post('/emails', function(req, res, next) {
 //
 //Past entries | Unsubscribe
 
-//sendgrid.send({
-//    to:       'jason@vonnieda.org',
-//    from:     process.env.CLOUDMAILIN_FORWARD_ADDRESS,
-//    subject:  'It\'s Friday, Sep 19 - How did your day go?',
-//    text:     'Just reply to this email with your entry.\r\nOh snap, remember this? One year ago you wrote...\r\n'
-//}, function(err, json) {
-//    if (err) {
-//        return console.error(err);
-//    }
-//    console.log(json);
-//});
+app.post('/jobs/send', function(req, res, next) {
+    sendgrid.send({
+        to: 'jason@vonnieda.org',
+        toname: 'Jason von Nieda',
+        from: process.env.CLOUDMAILIN_FORWARD_ADDRESS,
+        fromname: 'WhoaLife',
+        subject:  'It\'s Friday, Sep 19 - How did your day go?',
+        text:     'Just reply to this email with your entry.\r\nOh snap, remember this? One year ago you wrote...\r\n'
+    }, function(err, json) {
+        if (err) {
+            return console.error(err);
+        }
+        console.log(json);
+    });
+});
 
 module.exports = app;
