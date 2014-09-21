@@ -44,16 +44,24 @@ app.post('/emails', function(req, res, next) {
     });
 });
 
-sendgrid.send({
-    to:       'jason@vonnieda.org',
-    from:     process.env.CLOUDMAILIN_FORWARD_ADDRESS,
-    subject:  'It\'s Friday, Sep 19 - How did your day go?',
-    text:     'Just reply to this email with your entry.'
-}, function(err, json) {
-    if (err) {
-        return console.error(err);
-    }
-    console.log(json);
-});
+//Just reply to this email with your entry.
+//
+//Oh snap, remember this? One year ago you wrote...
+//
+//Went out to North Bend to find a house hidden in the woods. Very fun adventure! Then North Ben Bar and Grill, Costco Gas and Target for socks and a sweater. Spent like $200 tonight! Cripes!
+//
+//Past entries | Unsubscribe
+
+//sendgrid.send({
+//    to:       'jason@vonnieda.org',
+//    from:     process.env.CLOUDMAILIN_FORWARD_ADDRESS,
+//    subject:  'It\'s Friday, Sep 19 - How did your day go?',
+//    text:     'Just reply to this email with your entry.\r\nOh snap, remember this? One year ago you wrote...\r\n'
+//}, function(err, json) {
+//    if (err) {
+//        return console.error(err);
+//    }
+//    console.log(json);
+//});
 
 module.exports = app;
