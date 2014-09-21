@@ -1,6 +1,5 @@
-Create a heroku account
 heroku create
 heroku addons:add mongohq
-Create a Sendgrid account
-Add incoming email parsing to Sendgrid https://sendgrid.com/developer/reply
+heroku addons:add sendgrid
+heroku addons:add cloudmailin --target http://yourapp.herokuapp.com/emails
 git push heroku master

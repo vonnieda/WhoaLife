@@ -30,6 +30,7 @@ app.get('/entries', function(req, res, next) {
 });
 
 app.post('/emails', function(req, res, next) {
+    console.log(req.body);
     var fields = {};
     req.busboy.on('field', function(field, value) {
         fields[field] = value;
