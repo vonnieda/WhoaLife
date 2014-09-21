@@ -45,8 +45,8 @@ app.post('/emails', function(req, res, next) {
 });
 
 sendgrid.send({
-    to:       '"Jason von Nieda" <jason@vonnieda.org>',
-    from:     '"WhoaLife" <' + process.env.CLOUDMAILIN_FORWARD_ADDRESS + '>',
+    to:       'jason@vonnieda.org',
+    from:     process.env.CLOUDMAILIN_FORWARD_ADDRESS,
     subject:  'It\'s Friday, Sep 19 - How did your day go?',
     text:     'Just reply to this email with your entry.'
 }, function(err, json) {
