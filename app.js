@@ -36,6 +36,7 @@ app.post('/emails', function(req, res, next) {
         fields[field] = value;
     });
     req.busboy.on('finish', function() {
+        console.log(fields);
         // fields.text is newline formatted text
         var doc = {
             createdAt : new Date(),
