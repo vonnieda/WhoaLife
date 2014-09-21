@@ -1,14 +1,17 @@
-var express = require('express');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var busboy = require('connect-busboy');
+var express = require('express'),
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
+    busboy = require('connect-busboy'),
+    db = require('monk')(process.env.MONGOHQ_URL),
+    entries = db.get('entries'),
+    jwt = require('jsonwebtoken'),
+    expressJwt = require('express-jwt');
 
 var app = express();
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(busboy({
     immediate : true,
     limits : {
@@ -16,7 +19,15 @@ app.use(busboy({
         fileSize : -1
     }
 }));
-app.use(cookieParser());
+
+app.get('/entries', function(req, res, next) {
+    entries.find({}, function(err, docs) {
+        if (err) {
+            return next(err);
+        }
+        return res.send(docs);
+    });
+});
 
 app.post('/emails', function(req, res, next) {
     var fields = {};
@@ -24,8 +35,12 @@ app.post('/emails', function(req, res, next) {
         fields[field] = value;
     });
     req.busboy.on('finish', function() {
-        console.log(fields);
-        console.log(fields.text);
+        // fields.text is newline formatted text
+        var doc = {
+            createdAt : new Date(),
+            text : fields.text
+        };
+        entries.insert(doc);
         res.status(200).end();
     });
 });
