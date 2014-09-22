@@ -36,4 +36,11 @@ Deploy the app
 
 Add a scheduled task to get your nightly email
 
+    heroku addons:open scheduler
+    
+In the resulting dashboard, add a once daily task with the following command.
+
     curl -XPOST ${WEB_URL}jobs/send
+    
+You should set the time of the task to run when you'd like to receive your
+email.
