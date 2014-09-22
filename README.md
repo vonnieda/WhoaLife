@@ -17,7 +17,7 @@ Create an app on Heroku
     
 Optionally rename the app to something you like
 
-    heroku apps:rename your_app_name
+    heroku apps:rename YOUR_APP_NAME
     
 Make note of your app's web URL
 
@@ -27,7 +27,7 @@ Add the required plugins
 
     heroku addons:add mongohq
     heroku addons:add sendgrid
-    heroku addons:add cloudmailin --target http://your_app_name.herokuapp.com/emails
+    heroku addons:add cloudmailin --target http://YOUR_APP_NAME.herokuapp.com/emails
     heroku addons:add scheduler
     
 Deploy the app
@@ -44,7 +44,7 @@ Add a scheduled task to send your daily email
     
 In the resulting dashboard, add a once daily task with the following command.
 
-    curl -XPOST http://your_app_name.herokuapp.com/jobs/send
+    curl -XPOST http://YOUR_APP_NAME.herokuapp.com/jobs/send
     
 You should set the time of the task to run when you'd like to receive your
-email.
+email. Make sure you take timezone into account.
