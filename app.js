@@ -43,6 +43,24 @@ app.put('/settings', function(req, res, next) {
 });
 
 app.get('/entries', function(req, res, next) {
+    getEntries(function(err, entries) {
+        if (err) {
+            return next(err);
+        }
+        return res.send(docs);
+    });
+});
+
+app.post('/entries', function(req, res, next) {
+    createEntry(req.body, function(err) {
+        if (err) {
+            return next(err);
+        }
+        return res.status(200).end();
+    });
+});
+
+app.get('/entries/closest', function(req, res, next) {
     entries.find({}, function(err, docs) {
         if (err) {
             return next(err);
@@ -106,6 +124,53 @@ app.post('/jobs/send', function(req, res, next) {
     });
 });
 
+/**
+ * Attempts to extract only the message from the email.
+ * @param email
+ */
+function extractEmailText(email) {
+    var lines = email.split(/\r?\n/);
+    console.dir(lines);
+    // find the first line that looks like quoted text
+    var firstIndex = -1;
+    for (var i = 0; i < lines.length; i++) {
+        if (/^>/.test(lines[i])) {
+            firstIndex = i;
+            break;
+        }
+    }
+    var lastIndex = -1;
+    for (var i = lines.length - 1; i >= 0; i--) {
+        if (/^>/.test(lines[i])) {
+            lastIndex = i;
+            break;
+        }
+    }
+    if (firstIndex == -1) {
+        return lines.join('\n');
+    }
+    lines = _.reject(lines, function(item, index) {
+        return (index >= firstIndex && index <= lastIndex);
+    });
+    // find the last line that looks like quoted text
+    // see if the line before the first line looks like quote header
+    // remove
+    return lines.join('\n');
+}
+
+function getRandomEntry(callback) {
+    getEntries(function(err, entries) {
+        if (err) {
+            return callback(err);
+        }
+        return callback(err, _.sample(entries));
+    });
+}
+
+function createEntry(entry, callback) {
+    entries.insert(entry, callback);
+}
+
 function getEntries(callback) {
     entries.find({}, function(err, docs) {
         if (err) {
@@ -145,5 +210,19 @@ function updateSettings(values, callback) {
 }
 
 entries.index('createdAt');
+
+var email =
+    '1Today I worked a lot\r\n\r\n' +
+    '2Today I worked a lot\r\n\r\n' +
+    '\r\n' +
+    '3Today I worked a lot\r\n\r\n' +
+    '> 4Today I worked a lot\r\n' +
+    '> 5Today I worked a lot\r\n' +
+    '> \r\n' +
+    '> 7Today I worked a lot\r\n' +
+    '> 8Today I worked a lot\r\n';
+
+console.log('------------');
+console.log(extractEmailText(email));
 
 module.exports = app;
