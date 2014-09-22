@@ -7,12 +7,16 @@ var express = require('express'),
     jwt = require('jsonwebtoken'),
     expressJwt = require('express-jwt'),
     sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD),
-    _ = require('underscore');
+    _ = require('underscore'),
+    moment = require('moment');
 
-if (!process.env.TO_EMAIL || !process.env.TO_NAME) {
-    console.error('Please set TO_EMAIL and TO_NAME:');
-    console.error('heroku config:set TO_EMAIL \'your_email@email.com\'');
-    console.error('heroku config:set TO_NAME \'Firstname Lastname\'');
+if (!process.env.TO_EMAIL ||
+    !process.env.TO_NAME ||
+    !process.env.WEB_URL) {
+    console.error('Configuration incomplete. Please try the below commands:');
+    console.error('heroku config:set TO_EMAIL=\'your_email@email.com\'');
+    console.error('heroku config:set TO_NAME=\'Firstname Lastname\'');
+    console.error('heroku config:set WEB_URL=\'http://your_app.herokuapp.com/\'');
     process.exit(1);
 }
 
@@ -52,33 +56,24 @@ app.post('/emails', function(req, res, next) {
     });
 });
 
-//Just reply to this email with your entry.
-//
-//Oh snap, remember this? One year ago you wrote...
-//
-//Went out to North Bend to find a house hidden in the woods. Very fun adventure! Then North Ben Bar and Grill, Costco Gas and Target for socks and a sweater. Spent like $200 tonight! Cripes!
-//
-//Past entries | Unsubscribe
-
 app.post('/jobs/send', function(req, res, next) {
-    // Friday, Sep 19
     var subjectTemplate = _.template('It\'s <%= date %> - How did your day go?');
 
     var bodyTemplate = _.template(
         'Just reply to this email with your entry.' + '\r\n\r\n' +
-        'Oh snap, remember this? One year ago you wrote...' + '\r\n\r\n' +
+        'Oh snap, remember this? <%= previousDate %> you wrote...' + '\r\n\r\n' +
         '<%= previous %>' + '\r\n\r\n' +
-        'Previous Entries: <%= previousUrl %>'
+        'Past Entries: <%= previousUrl %>'
     );
 
     var subject = subjectTemplate({
-//        date : 'Friday, Sep 19'
-        date : new Date().toString()
+        date : moment().format('dddd, MMM Do')
     });
 
     var body = bodyTemplate({
-        previous : 'Something really cool!',
-        previousUrl : 'http://whoalife.herokuapp.com/entries'
+        previousDate: 'One year ago',
+        previous : '[previous entries not yet implemented]',
+        previousUrl : process.env.WEB_URL + '/entries'
     });
 
     sendgrid.send({
