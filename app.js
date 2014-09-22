@@ -51,6 +51,15 @@ app.get('/entries', function(req, res, next) {
     });
 });
 
+app.get('/entries/random', function(req, res, next) {
+    getRandomEntry(function(err, entry) {
+        if (err) {
+            return next(err);
+        }
+        return res.send(entry);
+    });
+});
+
 app.post('/entries', function(req, res, next) {
     createEntry(req.body, function(err) {
         if (err) {
