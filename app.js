@@ -8,17 +8,24 @@ var express = require('express'),
     expressJwt = require('express-jwt'),
     sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD),
     _ = require('underscore'),
-    moment = require('moment');
+    moment = require('moment-timezone'),
+    request = require('request');
 
 if (!process.env.TO_EMAIL ||
     !process.env.TO_NAME ||
-    !process.env.WEB_URL) {
+    !process.env.WEB_URL ||
+    !process.env.SEND_TZ ||
+    !process.env.SEND_HOUR) {
     console.error('Configuration incomplete. Please try the below commands:');
     console.error('heroku config:set TO_EMAIL=\'your_email@email.com\'');
     console.error('heroku config:set TO_NAME=\'Firstname Lastname\'');
     console.error('heroku config:set WEB_URL=\'http://your_app.herokuapp.com/\'');
+    console.error('heroku config:set SEND_TZ=\'America/Los_Angeles\'');
+    console.error('heroku config:set SEND_HOUR=\'20\'');
     process.exit(1);
 }
+
+var webUrl = process.env.WEB_URL.replace(/\/+$/, '');
 
 var app = express();
 
@@ -47,6 +54,9 @@ app.post('/emails', function(req, res, next) {
         fields[field] = value;
     });
     req.busboy.on('finish', function() {
+        if (!fields.plain) {
+            return res.status(404).end();
+        }
         var doc = {
             createdAt : new Date(),
             text : fields.plain
@@ -68,10 +78,8 @@ app.post('/jobs/send', function(req, res, next) {
     );
 
     var subject = subjectTemplate({
-        date : moment().format('dddd, MMM Do')
+        date : moment().tz(process.env.SEND_TZ).format('dddd, MMM Do')
     });
-
-    var webUrl = process.env.WEB_URL.replace(/\/+$/, '');
 
     var body = bodyTemplate({
         previousDate: 'One year ago',
@@ -93,6 +101,24 @@ app.post('/jobs/send', function(req, res, next) {
         console.log(json);
         res.status(200).end();
     });
+});
+
+// Configure our cron job
+var m = moment().tz(process.env.SEND_TZ);
+m.hour(process.env.SEND_HOUR);
+
+https://Rw6vZpy8QVy2Kv6U44QWUg:bev7ko1c7ponftaiqjcad3jr@api.temporize.net/v1/events/0 3 * * ?#http://whoalife.herokuapp.com/jobs/send
+var url = process.env.TEMPORIZE_URL +
+    '/v1/events/' +
+    encodeURIComponent('0 ' + m.tz('UTC').hour() + '* * ?') +
+    '#' +
+    encodeURIComponent(webUrl + '/jobs/send');
+
+console.log(url);
+
+request.post(url, function(err, res) {
+    console.log(err);
+    console.log(res);
 });
 
 module.exports = app;
