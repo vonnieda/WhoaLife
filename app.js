@@ -47,7 +47,7 @@ app.get('/entries', function(req, res, next) {
         if (err) {
             return next(err);
         }
-        return res.send(docs);
+        return res.send(entries);
     });
 });
 
@@ -57,15 +57,6 @@ app.post('/entries', function(req, res, next) {
             return next(err);
         }
         return res.status(200).end();
-    });
-});
-
-app.get('/entries/closest', function(req, res, next) {
-    entries.find({}, function(err, docs) {
-        if (err) {
-            return next(err);
-        }
-        return res.send(docs);
     });
 });
 

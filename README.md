@@ -1,3 +1,9 @@
+# TODO
+
+* Random previous entry
+* Get scheduler figured out properly
+* Finish up settings page
+
 # WhoaLife
 
 The following instructions assume you already have a verified Heroku account. If
@@ -11,7 +17,7 @@ Create an app on Heroku
     
 Optionally rename the app to something you like
 
-    heroku apps:rename my_whoalife
+    heroku apps:rename your_app_name
     
 Make note of your app's web URL
 
@@ -21,7 +27,7 @@ Add the required plugins
 
     heroku addons:add mongohq
     heroku addons:add sendgrid
-    heroku addons:add cloudmailin --target http://your_web_url.herokuapp.com/emails
+    heroku addons:add cloudmailin --target http://your_app_name.herokuapp.com/emails
     heroku addons:add scheduler
     
 Deploy the app
@@ -38,7 +44,7 @@ Add a scheduled task to send your daily email
     
 In the resulting dashboard, add a once daily task with the following command.
 
-    curl -XPOST ${WEB_URL}jobs/send
+    curl -XPOST http://your_app_name.herokuapp.com/jobs/send
     
 You should set the time of the task to run when you'd like to receive your
 email.
