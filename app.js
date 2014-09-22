@@ -73,7 +73,7 @@ app.post('/jobs/send', function(req, res, next) {
     );
 
     var subject = subjectTemplate({
-        date : moment().tz(process.env.SEND_TZ).format('dddd, MMM Do')
+        date : moment().format('dddd, MMM Do')
     });
 
     var body = bodyTemplate({
