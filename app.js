@@ -202,18 +202,18 @@ function updateSettings(values, callback) {
 
 entries.index('createdAt');
 
-var email =
-    '1Today I worked a lot\r\n\r\n' +
-    '2Today I worked a lot\r\n\r\n' +
-    '\r\n' +
-    '3Today I worked a lot\r\n\r\n' +
-    '> 4Today I worked a lot\r\n' +
-    '> 5Today I worked a lot\r\n' +
-    '> \r\n' +
-    '> 7Today I worked a lot\r\n' +
-    '> 8Today I worked a lot\r\n';
-
-console.log('------------');
-console.log(extractEmailText(email));
+//var email =
+//    '1Today I worked a lot\r\n\r\n' +
+//    '2Today I worked a lot\r\n\r\n' +
+//    '\r\n' +
+//    '3Today I worked a lot\r\n\r\n' +
+//    '> 4Today I worked a lot\r\n' +
+//    '> 5Today I worked a lot\r\n' +
+//    '> \r\n' +
+//    '> 7Today I worked a lot\r\n' +
+//    '> 8Today I worked a lot\r\n';
+//
+//console.log('------------');
+//console.log(extractEmailText(email));
 
 module.exports = app;
