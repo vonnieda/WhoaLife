@@ -27,8 +27,13 @@ Set some configuration variables
     heroku config:set TO_NAME='Your Name'
     heroku config:set TO_EMAIL='youremail@email.com'
     heroku config:set WEB_URL='http://your_web_url.herokuapp.com'
+    # See http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
     heroku config:set TZ='America/Los_Angeles'
     
 Deploy the app
 
     git push heroku master
+
+Add a scheduled task to get your nightly email
+
+    curl -XPOST ${WEB_URL}jobs/send
