@@ -51,6 +51,7 @@ app.post('/emails', function(req, res, next) {
             createdAt : new Date(),
             text : fields.plain
         };
+        console.log(fields.plain);
         entries.insert(doc);
         res.status(200).end();
     });
@@ -70,10 +71,12 @@ app.post('/jobs/send', function(req, res, next) {
         date : moment().format('dddd, MMM Do')
     });
 
+    var webUrl = process.env.WEB_URL.replace(/\/+$/, '');
+
     var body = bodyTemplate({
         previousDate: 'One year ago',
         previous : '[previous entries not yet implemented]',
-        previousUrl : process.env.WEB_URL + '/entries'
+        previousUrl : webUrl + '/entries'
     });
 
     sendgrid.send({
