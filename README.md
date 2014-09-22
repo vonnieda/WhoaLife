@@ -1,3 +1,5 @@
+# WhoaLife
+
 The following instructions assume you already have a verified Heroku account. If
 you don't you'll need to set one up first. While this does require a verified
 account, all of the services used are free so no charges should actually be
@@ -21,14 +23,6 @@ Add the required plugins
     heroku addons:add sendgrid
     heroku addons:add cloudmailin --target http://your_web_url.herokuapp.com/emails
     heroku addons:add scheduler
-    
-Set some configuration variables
-
-    heroku config:set TO_NAME='Your Name'
-    heroku config:set TO_EMAIL='youremail@email.com'
-    heroku config:set WEB_URL='http://your_web_url.herokuapp.com'
-    # See http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-    heroku config:set TZ='America/Los_Angeles'
     
 Deploy the app
 
