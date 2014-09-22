@@ -20,13 +20,14 @@ Add the required plugins
     heroku addons:add mongohq
     heroku addons:add sendgrid
     heroku addons:add cloudmailin --target http://your_web_url.herokuapp.com/emails
-    heroku addons:add temporize
+    heroku addons:add scheduler
     
 Set some configuration variables
 
     heroku config:set TO_NAME='Your Name'
     heroku config:set TO_EMAIL='youremail@email.com'
     heroku config:set WEB_URL='http://your_web_url.herokuapp.com'
+    heroku config:set TZ='America/Los_Angeles'
     
 Deploy the app
 
