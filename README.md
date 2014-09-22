@@ -27,8 +27,12 @@ Add the required plugins
 Deploy the app
 
     git push heroku master
+    
+Perform initial app setup
 
-Add a scheduled task to get your nightly email
+    heroku apps:open
+    
+Add a scheduled task to send your daily email
 
     heroku addons:open scheduler
     

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <form>
+        <input type="text" id="name" />
+        <input type="text" id="email" />
+        <input type="text" id="timezone" />
+        <input type="text" id="hour" />
+        <input type="text" id="webRoot" />
+    </form>
+</body>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script language="JavaScript">
+    $(document).ready(function() {
+        $.getJSON('/settings', function(data) {
+            $('#name').val(data.name);
+            $('#email').val(data.email);
+            $('#timezone').val(data.timezone);
+            $('#hour').val(data.hour);
+            $('#webRoot').val(data.webRoot);
+        });
+    });
+</script>
+</html>
