@@ -113,6 +113,18 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label for="schedulerCommand" class="col-sm-3 control-label">Scheduler Command</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control readonly" id="schedulerCommand">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="schedulerTime" class="col-sm-3 control-label">Scheduler Time</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control readonly" id="schedulerTime">
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <button type="submit" class="btn btn-primary col-sm-2 col-sm-offset-10" id="save">Save</button>
                     </div>
                 </form>
@@ -128,7 +140,7 @@
 
 <script>
     $(function() {
-        var token = '';
+        var token = window.location.search.slice(1);
 
         var SettingsModel = Backbone.Model.extend({
             url : '/settings'
@@ -162,6 +174,8 @@
                 $('#hour').val(this.model.get('hour'));
                 $('#timezone').val(this.model.get('timezone'));
                 $('#webRoot').val(this.model.get('webRoot'));
+                $('#schedulerCommand').val('curl -XPOST ' + this.model.get('webRoot') + '?jwt=' + this.model.get('token'));
+                $('#schedulerTime').val(this.model.get('hour') + ':00');
             },
 
             save : function(e) {
