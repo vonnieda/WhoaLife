@@ -174,7 +174,8 @@
                 $('#hour').val(this.model.get('hour'));
                 $('#timezone').val(this.model.get('timezone'));
                 $('#webRoot').val(this.model.get('webRoot'));
-                $('#schedulerCommand').val('curl -XPOST ' + this.model.get('webRoot') + '?jwt=' + this.model.get('token'));
+                // TODO: These should move into the model as derived properties.
+                $('#schedulerCommand').val('curl -XPOST ' + this.model.get('webRoot') + '/jobs/send?jwt=' + this.model.get('token'));
                 $('#schedulerTime').val(this.model.get('hour') + ':00');
             },
 

@@ -80,7 +80,12 @@ app.put('/settings', function(req, res, next) {
         if (err) {
             return next(err);
         }
-        return res.status(200).end();
+        getSettings(function(err, settings) {
+            if (err) {
+                return next(err);
+            }
+            return res.status(200).end();
+        });
     });
 });
 
