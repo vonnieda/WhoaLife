@@ -69,6 +69,13 @@ app.get('/settings', function(req, res, next) {
 });
 
 app.put('/settings', function(req, res, next) {
+    var update = _.pick(req.body, [
+        'name',
+        'email',
+        'timezone',
+        'hour',
+        'webRoot'
+    ]);
     updateSettings(req.body, function(err) {
         if (err) {
             return next(err);
@@ -87,6 +94,16 @@ app.get('/entries', function(req, res, next) {
 });
 
 app.get('/entries/random', function(req, res, next) {
+    getRandomEntry(function(err, entry) {
+        if (err) {
+            return next(err);
+        }
+        return res.send(entry);
+    });
+});
+
+app.get('/entries/latest', function(req, res, next) {
+    // TODO
     getRandomEntry(function(err, entry) {
         if (err) {
             return next(err);
@@ -260,7 +277,8 @@ function getSettings(callback) {
             email : null,
             timezone : 'America/Los_Angeles',
             hour : 20,
-            webRoot : null
+            webRoot : null,
+            token : jwt.sign({}, config.jwtSecret)
         });
         return callback(null, _.omit(doc, '_id'));
     });
