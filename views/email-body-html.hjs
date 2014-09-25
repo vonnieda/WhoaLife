@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+Just reply to this email with your entry.<br>
+<br>
+Oh snap, remember this? {{{ previousEntryDate }}} you wrote...<br>
+<br>
+{{{ previousEntryBody }}}<br>
+<br>
+<a href="{{{ previousEntriesUrl }}}">Past entries</a>
+</body>
+</html>

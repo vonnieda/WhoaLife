@@ -1,21 +1,40 @@
-var express = require('express'),
+var async = require('async'),
+    express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
     busboy = require('connect-busboy'),
-    db = require('monk')(process.env.MONGOHQ_URL),
-    entries = db.get('entries'),
-    settings = db.get('settings'),
     jwt = require('jsonwebtoken'),
     expressJwt = require('express-jwt'),
-    sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD),
     _ = require('underscore'),
-    moment = require('moment-timezone');
+    moment = require('moment-timezone'),
+    path = require('path');
+
+var config = {
+    mongoDbUrl : process.env.MONGOHQ_URL,
+    sendgridUsername: process.env.SENDGRID_USERNAME,
+    sendgridPassword: process.env.SENDGRID_PASSWORD,
+    cloudmailinForwardAddress: process.env.CLOUDMAILIN_FORWARD_ADDRESS,
+    jwtSecret: process.env.JWT_SECRET || process.env.MONGOHQ_URL
+};
+
+var db = require('monk')(config.mongoDbUrl),
+    entries = db.get('entries'),
+    settings = db.get('settings'),
+    sendgrid  = require('sendgrid')(config.sendgridUsername, config.sendgridPassword);
+
 
 var app = express();
 
-app.use(express.static(__dirname + '/public'));
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hjs');
+
+// uncomment after placing your favicon in /public
+//app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+//app.use(cookieParser());
 app.use(busboy({
     immediate : true,
     limits : {
@@ -23,6 +42,22 @@ app.use(busboy({
         fileSize : -1
     }
 }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/pkgs', express.static(path.join(__dirname, '/bower_components')));
+
+/**
+ * This middleware looks for a query parameter called jwt and set it as
+ * the Authorization header if one is missing. This is so we can use the
+ * express-jwt middleware below unchanged when we don't want to make
+ * the request with a header.
+ */
+app.use(function(req, res, next) {
+    if (!req.get('Authorization') && req.query.jwt) {
+        req.headers.authorization = 'Bearer ' + req.query.jwt;
+    }
+    next();
+});
+app.use(expressJwt({ secret : config.jwtSecret }));
 
 app.get('/settings', function(req, res, next) {
     getSettings(function(err, settings) {
@@ -88,33 +123,62 @@ app.post('/emails', function(req, res, next) {
 });
 
 app.post('/jobs/send', function(req, res, next) {
-    getSettings(function(err, settings) {
-        var subjectTemplate = _.template('It\'s <%= date %> - How did your day go?');
+    async.auto({
+        settings : getSettings,
+        previousEntry : getRandomEntry,
+        subject : ['settings', function(callback, results) {
+            var settings = results.settings;
+            var date = moment().tz(settings.timezone).format('dddd, MMM Do');
+            date = date.charAt(0).toUpperCase() + date.slice(1);
+            var params = {
+                date : date
+            };
+            app.render('email-subject', params, callback);
+        }],
+        body : ['settings', 'previousEntry', function(callback, results) {
+            var settings = results.settings;
+            var previousEntry = results.previousEntry;
+            var token = jwt.sign({},
+                config.jwtSecret,
+                { expiresInMinutes : 60 * 24 });
+            var params = {
+                previousEntryDate: moment(previousEntry.createdAt).fromNow(),
+                previousEntryBody : previousEntry.text,
+                previousEntriesUrl : settings.webRoot + '?jwt=' + token
+            };
+            app.render('email-body-text', params, callback);
+        }],
+        bodyHtml : ['settings', 'previousEntry', function(callback, results) {
+            var settings = results.settings;
+            var previousEntry = results.previousEntry;
+            var token = jwt.sign({},
+                config.jwtSecret,
+                { expiresInMinutes : 60 * 24 });
+            var params = {
+                previousEntryDate: moment(previousEntry.createdAt).fromNow(),
+                previousEntryBody : previousEntry.text.replace(/\n/g, '<br>'),
+                previousEntriesUrl : settings.webRoot + '?jwt=' + token
+            };
+            app.render('email-body-html', params, callback);
+        }]
+    }, function(err, results) {
+        if (err) {
+            return next(err);
+        }
 
-        var bodyTemplate = _.template(
-                'Just reply to this email with your entry.' + '\r\n\r\n' +
-                'Oh snap, remember this? <%= previousDate %> you wrote...' + '\r\n\r\n' +
-                '<%= previous %>' + '\r\n\r\n' +
-                'Past Entries: <%= previousUrl %>'
-        );
-
-        var subject = subjectTemplate({
-            date : moment().tz(settings.timezone).format('dddd, MMM Do')
-        });
-
-        var body = bodyTemplate({
-            previousDate: 'One year ago',
-            previous : '[previous entries not yet implemented]',
-            previousUrl : settings.webRoot + '/entries'
-        });
+        var settings = results.settings;
+        var subject = results.subject;
+        var body = results.body;
+        var bodyHtml = results.bodyHtml;
 
         sendgrid.send({
             to: settings.email,
             toname: settings.name,
-            from: process.env.CLOUDMAILIN_FORWARD_ADDRESS,
+            from: config.cloudmailinForwardAddress,
             fromname: 'WhoaLife',
             subject: subject,
-            text: body
+            text: body,
+            html : bodyHtml
         }, function(err, json) {
             if (err) {
                 return next(err);
@@ -210,19 +274,5 @@ function updateSettings(values, callback) {
 }
 
 entries.index('createdAt');
-
-//var email =
-//    '1Today I worked a lot\r\n\r\n' +
-//    '2Today I worked a lot\r\n\r\n' +
-//    '\r\n' +
-//    '3Today I worked a lot\r\n\r\n' +
-//    '> 4Today I worked a lot\r\n' +
-//    '> 5Today I worked a lot\r\n' +
-//    '> \r\n' +
-//    '> 7Today I worked a lot\r\n' +
-//    '> 8Today I worked a lot\r\n';
-//
-//console.log('------------');
-//console.log(extractEmailText(email));
 
 module.exports = app;
