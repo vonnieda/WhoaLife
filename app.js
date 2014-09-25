@@ -76,7 +76,7 @@ app.put('/settings', function(req, res, next) {
         'hour',
         'webRoot'
     ]);
-    updateSettings(req.body, function(err) {
+    updateSettings(update, function(err) {
         if (err) {
             return next(err);
         }
@@ -84,7 +84,7 @@ app.put('/settings', function(req, res, next) {
             if (err) {
                 return next(err);
             }
-            return res.status(200).end();
+            return res.send(settings);
         });
     });
 });
