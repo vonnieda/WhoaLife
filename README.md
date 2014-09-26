@@ -123,3 +123,27 @@ the below. You'll need those URLs for the next two tasks.
 # Running Locally
 
     npm start
+
+# How It Works
+
+WhoaLife is a simple Node.js application based on Express. It uses MongoDB for
+data storage and a number of Heroku services to help it along. It only does
+three things:
+
+1. Sending a POST to /emails will record a new entry into the diary. WhoaLife
+uses Cloudmailin to receive emails that you send. Cloudmailin parses the email
+and POSTs it to /emails.
+
+2. Sending a POST to /jobs/send will send you an email asking how your day
+went. It uses Sendgrid to send the email and it uses Heroku's Scheduler addon
+to trigger the send once a day.
+
+3. Loading / in a browser will show you all your previous entries ordered by
+date. That's it.
+
+Authentication is handled using HTTPS basic auth. Each of the three routes
+mentioned above require a signed JSON Web Token sent via basic auth. This is
+done transparently to you. It's embedded in the link in the email for you to
+view your diary and it's embedded in the URLs that you set up during
+installation for the Scheduler and Cloudmailin.
+
