@@ -4,22 +4,25 @@ var async = require('async'),
     bodyParser = require('body-parser'),
     busboy = require('connect-busboy'),
     jwt = require('jsonwebtoken'),
-    expressJwt = require('express-jwt'),
     _ = require('underscore'),
-    moment = require('moment-timezone'),
-    path = require('path');
+    moment = require('moment'),
+    path = require('path'),
+    URL = require('url'),
+    basicAuth = require('basic-auth');
 
 var config = {
     mongoDbUrl : process.env.MONGOHQ_URL,
     sendgridUsername: process.env.SENDGRID_USERNAME,
     sendgridPassword: process.env.SENDGRID_PASSWORD,
     cloudmailinForwardAddress: process.env.CLOUDMAILIN_FORWARD_ADDRESS,
-    jwtSecret: process.env.JWT_SECRET || process.env.MONGOHQ_URL
+    jwtSecret: process.env.JWT_SECRET || process.env.MONGOHQ_URL,
+    name : process.env.NAME,
+    email : process.env.EMAIL,
+    webRoot : process.env.WEB_ROOT.replace(/\/$/, '')
 };
 
 var db = require('monk')(config.mongoDbUrl),
     entries = db.get('entries'),
-    settings = db.get('settings'),
     sendgrid  = require('sendgrid')(config.sendgridUsername, config.sendgridPassword);
 
 
@@ -46,83 +49,43 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/pkgs', express.static(path.join(__dirname, '/bower_components')));
 
 /**
- * This middleware looks for a query parameter called jwt and set it as
- * the Authorization header if one is missing. This is so we can use the
- * express-jwt middleware below unchanged when we don't want to make
- * the request with a header.
+ * Simple HTTP basic auth that looks for a valid, signed JWT in the password
+ * field. Username is ignored.
  */
-app.use(function(req, res, next) {
-    if (!req.get('Authorization') && req.query.jwt) {
-        req.headers.authorization = 'Bearer ' + req.query.jwt;
-    }
-    next();
-});
-app.use(expressJwt({ secret : config.jwtSecret }));
+app.use(function (req, res, next) {
+    function unauthorized(res) {
+        res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+        return res.status(401).end();
+    };
 
-app.get('/settings', function(req, res, next) {
-    getSettings(function(err, settings) {
+    var user = basicAuth(req);
+
+    if (!user || !user.name || !user.pass) {
+        return unauthorized(res);
+    };
+
+    jwt.verify(user.pass, config.jwtSecret, function(err, jwt) {
         if (err) {
-            return next(err);
+            return unauthorized(res);
         }
-        return res.send(settings);
+        return next();
     });
 });
 
-app.put('/settings', function(req, res, next) {
-    var update = _.pick(req.body, [
-        'name',
-        'email',
-        'timezone',
-        'hour',
-        'webRoot'
-    ]);
-    updateSettings(update, function(err) {
-        if (err) {
-            return next(err);
-        }
-        getSettings(function(err, settings) {
-            if (err) {
-                return next(err);
-            }
-            return res.send(settings);
-        });
-    });
-});
-
-app.get('/entries', function(req, res, next) {
+app.get('/', function(req, res, next) {
     getEntries(function(err, entries) {
         if (err) {
             return next(err);
         }
-        return res.send(entries);
-    });
-});
-
-app.get('/entries/random', function(req, res, next) {
-    getRandomEntry(function(err, entry) {
-        if (err) {
-            return next(err);
-        }
-        return res.send(entry);
-    });
-});
-
-app.get('/entries/latest', function(req, res, next) {
-    // TODO
-    getRandomEntry(function(err, entry) {
-        if (err) {
-            return next(err);
-        }
-        return res.send(entry);
-    });
-});
-
-app.post('/entries', function(req, res, next) {
-    createEntry(req.body, function(err) {
-        if (err) {
-            return next(err);
-        }
-        return res.status(200).end();
+        _.each(entries, function(entry) {
+            entry.formattedDate = moment(entry.createdAt).format('MMMM Do YYYY');
+            entry.formattedDay = moment(entry.createdAt).format('dddd');
+            entry.formattedText = entry.text.replace(/\n/g, '<br>');
+        });
+        res.render('index', {
+            name : config.name,
+            entries : entries
+        });
     });
 });
 
@@ -139,47 +102,50 @@ app.post('/emails', function(req, res, next) {
             createdAt : new Date(),
             text : fields.plain
         };
-        entries.insert(doc);
-        res.status(200).end();
+        createEntry(doc, function(err) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).end();
+        });
     });
 });
 
 app.post('/jobs/send', function(req, res, next) {
+    function createPreviousEntriesUrl(webRoot) {
+        var token = jwt.sign({},
+            config.jwtSecret,
+            { expiresInMinutes : 60 * 24 });
+        var url = URL.parse(webRoot);
+        url.auth = 'a:' + token;
+        return URL.format(url);
+    }
+
     async.auto({
-        settings : getSettings,
         previousEntry : getRandomEntry,
-        subject : ['settings', function(callback, results) {
-            var settings = results.settings;
-            var date = moment().tz(settings.timezone).format('dddd, MMM Do');
+        subject : [function(callback, results) {
+            var date = moment().format('dddd, MMM Do');
             date = date.charAt(0).toUpperCase() + date.slice(1);
             var params = {
                 date : date
             };
             app.render('email-subject', params, callback);
         }],
-        body : ['settings', 'previousEntry', function(callback, results) {
-            var settings = results.settings;
+        body : ['previousEntry', function(callback, results) {
             var previousEntry = results.previousEntry;
-            var token = jwt.sign({},
-                config.jwtSecret,
-                { expiresInMinutes : 60 * 24 });
             var params = {
                 previousEntryDate: moment(previousEntry.createdAt).fromNow(),
                 previousEntryBody : previousEntry.text,
-                previousEntriesUrl : settings.webRoot + '?' + token
+                previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             app.render('email-body-text', params, callback);
         }],
-        bodyHtml : ['settings', 'previousEntry', function(callback, results) {
-            var settings = results.settings;
+        bodyHtml : ['previousEntry', function(callback, results) {
             var previousEntry = results.previousEntry;
-            var token = jwt.sign({},
-                config.jwtSecret,
-                { expiresInMinutes : 60 * 24 });
             var params = {
                 previousEntryDate: moment(previousEntry.createdAt).fromNow(),
                 previousEntryBody : previousEntry.text.replace(/\n/g, '<br>'),
-                previousEntriesUrl : settings.webRoot + '?' + token
+                previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             app.render('email-body-html', params, callback);
         }]
@@ -188,14 +154,13 @@ app.post('/jobs/send', function(req, res, next) {
             return next(err);
         }
 
-        var settings = results.settings;
         var subject = results.subject;
         var body = results.body;
         var bodyHtml = results.bodyHtml;
 
         sendgrid.send({
-            to: settings.email,
-            toname: settings.name,
+            to: config.email,
+            toname: config.name,
             from: config.cloudmailinForwardAddress,
             fromname: 'WhoaLife',
             subject: subject,
@@ -258,7 +223,7 @@ function createEntry(entry, callback) {
 }
 
 function getEntries(callback) {
-    entries.find({}, function(err, docs) {
+    entries.find({ $query : {}, $orderby : { createdAt : -1 }}, function(err, docs) {
         if (err) {
             return callback(err);
         }
@@ -269,33 +234,20 @@ function getEntries(callback) {
     });
 }
 
-function getSettings(callback) {
-    settings.findOne({}, function(err, doc) {
-        if (err) {
-            return callback(err);
-        }
-        if (!doc) {
-            doc = {};
-        }
-        doc = _.defaults(doc, {
-            name : null,
-            email : null,
-            timezone : 'America/Los_Angeles',
-            hour : 20,
-            webRoot : null,
-            token : jwt.sign({}, config.jwtSecret)
-        });
-        return callback(null, _.omit(doc, '_id'));
-    });
-}
-
-function updateSettings(values, callback) {
-    if (values.webRoot) {
-        values.webRoot = values.webRoot.replace(/\/+$/, '');
-    }
-    settings.update({}, { $set : values }, { upsert : true }, callback);
-}
-
 entries.index('createdAt');
 
 module.exports = app;
+
+// Print handy startup messages
+var token = jwt.sign({}, config.jwtSecret);
+var url = URL.parse(config.webRoot);
+url.auth = 'a:' + token;
+url = URL.format(url);
+
+console.log('WhoaLife');
+console.log();
+console.log('Scheduler Send Mail Command:');
+console.log('curl -XPOST \'' + url + 'jobs/send\'');
+console.log();
+console.log('Cloudmailin Target URL:');
+console.log(url + 'emails');

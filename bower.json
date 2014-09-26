@@ -14,7 +14,6 @@
   ],
   "dependencies": {
     "bootstrap": "~3.2.0",
-    "normalize-css": "~3.0.1",
-    "backbone": "~1.1.2"
+    "normalize-css": "~3.0.1"
   }
 }
