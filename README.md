@@ -5,8 +5,18 @@ An homage to the excellent, but short lived, OhLife daily diary system.
 WhoaLife will email you once a day and ask you how your day went. Just reply
 to the email and your diary grows.
 
-I wrote this in response to the shutting down of OhLife. It's a daily part of
-my life and I would really miss it if it was gone.
+# Why
+
+OhLife was one of my favorite apps on the web. Simple and concise, it did
+exactly one thing and it did it incredibly well.
+
+When they announced the shutdown of the site in September, 2014 I was crushed.
+I'd been using it for 3 years and I still really enjoy using it. I decided as
+soon as I got the email that I would make my own.
+
+I make no claims of any type to the name or property of OhLife. This app was
+written entirely from scratch over the course of a few nights. It's not nearly
+as good as OhLife was, but it'll do. It'll do.
 
 # Installation
 
