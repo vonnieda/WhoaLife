@@ -2,10 +2,19 @@
 
 An homage to the excellent, but short lived, OhLife daily diary system.
 
+WhoaLife will email you once a day and ask you how your day went. Just reply
+to the email and your diary grows.
+
+I wrote this in response to the shutting down of OhLife. It's a daily part of
+my life and I would really miss it if it was gone.
+
 # Installation
 
 This app is designed to be run on Heroku. You can run it elsewhere but you'll
 need to have your own MongoDB instance and a way to run scheduled tasks.
+
+WhoaLife is a single user application. It's just for you. If someone else wants
+to use it they'll have to set up their own.
 
 The following instructions assume you already have a verified Heroku account. If
 you don't you'll need to set one up first. While this does require a verified
