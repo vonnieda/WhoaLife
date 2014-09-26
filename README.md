@@ -62,9 +62,9 @@ the below. You'll need those URLs for the next two tasks.
 
         WhoaLife
     
-        Scheduler Send Mail Command: curl -XPOST 'http://a:eyJ0eXAi9287349182374iOiJIUzI1NiJ9.eyJpYXQi987349238742NDZ9.8fzBdgMY9o798172918723E68F8fZNMSE5GLRiLg7fzI@localhost:3000/jobs/send'
+        Scheduler Send Mail Command: curl -XPOST 'http://a:eyJ0eXAi9287349182374iOiJIUzI1NiJ9.eyJpYXQi987349238742NDZ9.8fzBdgMY9o798172918723E68F8fZNMSE5GLRiLg7fzI@whoalife.herokuapp.com/jobs/send'
     
-        Cloudmailin Target URL: http://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@localhost:3000/emails
+        Cloudmailin Target URL: http://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@whoalife.herokuapp.com/emails
     
 11. Add a scheduled task to send your daily email
 
@@ -73,7 +73,7 @@ the below. You'll need those URLs for the next two tasks.
     In the resulting dashboard, add a once daily task using the "Scheduler Send
     Mail Command" that you saw in your logs. It should look something like:
 
-        curl -XPOST 'http://a:eyJ0eXAi9287349182374iOiJIUzI1NiJ9.eyJpYXQi987349238742NDZ9.8fzBdgMY9o798172918723E68F8fZNMSE5GLRiLg7fzI@localhost:3000/jobs/send'
+        curl -XPOST 'http://a:eyJ0eXAi9287349182374iOiJIUzI1NiJ9.eyJpYXQi987349238742NDZ9.8fzBdgMY9o798172918723E68F8fZNMSE5GLRiLg7fzI@whoalife.herokuapp.com/jobs/send'
     
     You should set the time of the task to run when you'd like to receive your
     email. Make sure you take timezone into account.
@@ -85,7 +85,7 @@ the below. You'll need those URLs for the next two tasks.
     In the resulting dashboard, click Edit Target and then add the "Cloudmailin
     Target URL" that you saw in your logs. It should look something like:
     
-        http://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@localhost:3000/emails
+        http://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@whoalife.herokuapp.com/emails
 
     You can leave the default delivery option (Multipart) selected.
     
