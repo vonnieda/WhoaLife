@@ -148,8 +148,8 @@ app.post('/jobs/send', function(req, res, next) {
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             if (previousEntry) {
-                previousEntryDate = moment(previousEntry.createdAt).fromNow();
-                previousEntryBody = previousEntry.text.replace(/\n/g, '<br>');
+                params.previousEntryDate = moment(previousEntry.createdAt).fromNow();
+                params.previousEntryBody = previousEntry.text.replace(/\n/g, '<br>');
             }
             app.render('email-body-html', params, callback);
         }]
