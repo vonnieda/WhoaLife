@@ -246,8 +246,6 @@ url = URL.format(url);
 
 console.log('WhoaLife');
 console.log();
-console.log('Scheduler Send Mail Command:');
-console.log('curl -XPOST \'' + url + 'jobs/send\'');
+console.log('Scheduler Send Mail Command: curl -XPOST \'' + url + 'jobs/send\'');
 console.log();
-console.log('Cloudmailin Target URL:');
-console.log(url + 'emails');
+console.log('Cloudmailin Target URL: ' + url + 'emails');

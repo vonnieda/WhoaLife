@@ -12,61 +12,90 @@ you don't you'll need to set one up first. While this does require a verified
 account, all of the services used are free so no charges should actually be
 accumulated.
 
-Create an app on Heroku
+1. Create an app on Heroku
 
-    heroku create
+        heroku create
     
-Optionally rename the app to something you like
+2. Optionally rename the app to something you like
 
-    heroku apps:rename YOUR_APP_NAME
+        heroku apps:rename YOUR_APP_NAME
     
-Add the required plugins
+3. Add the required plugins
 
-    heroku addons:add mongohq
-    heroku addons:add sendgrid
-    heroku addons:add cloudmailin
-    heroku addons:add scheduler
+        heroku addons:add mongohq
+        heroku addons:add sendgrid
+        heroku addons:add cloudmailin
+        heroku addons:add scheduler
     
-Set your email address
+4. Set your email address
 
-    heroku config:set EMAIL='YOUR_EMAIL_ADDRESS'
+        heroku config:set EMAIL='YOUR_EMAIL_ADDRESS'
     
-Set your full name
+5. Set your full name
     
-    heroku config:set NAME='YOUR_NAME'
+        heroku config:set NAME='YOUR_NAME'
     
-Note the URL of your application. You will need it for the next command.
+6. Note the URL of your application. You will need it for the next command.
 
-    heroku apps:info | grep 'Web URL'    
+        heroku apps:info | grep 'Web URL'    
     
-Set the URL for the application. This is the URL from the previous command. I
+7. Set the URL for the application. This is the URL from the previous command. I
 recommend changing the http to https for better security.
 
-    heroku config:set WEB_ROOT='https://YOUR_APP_NAME.herokoapp.com'
+        heroku config:set WEB_ROOT='https://YOUR_APP_NAME.herokoapp.com'
     
-Set your timezone. There is a list available at:
+8. Set your timezone. There is a list available at:
 http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
      
-    heroku config:set TZ='America/Los_Angeles'
+        heroku config:set TZ='America/Los_Angeles'
     
-Deploy the app
+9. Deploy the app
 
-    git push heroku master
+        git push heroku master
     
-Look at the logs to get some important URLs
-    
-    
-    
-Add a scheduled task to send your daily email
+10. Look at the logs to get some important URLs. You are looking for text like
+the below. You'll need those URLs for the next two tasks.
 
-    heroku addons:open scheduler
+        WhoaLife
     
-In the resulting dashboard, add a once daily task with the following command.
+        Scheduler Send Mail Command: curl -XPOST 'http://a:eyJ0eXAi9287349182374iOiJIUzI1NiJ9.eyJpYXQi987349238742NDZ9.8fzBdgMY9o798172918723E68F8fZNMSE5GLRiLg7fzI@localhost:3000/jobs/send'
+    
+        Cloudmailin Target URL: http://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@localhost:3000/emails
+    
+11. Add a scheduled task to send your daily email
 
-    curl -XPOST http://YOUR_APP_NAME.herokuapp.com/jobs/send
+        heroku addons:open scheduler
     
-You should set the time of the task to run when you'd like to receive your
-email. Make sure you take timezone into account.
+    In the resulting dashboard, add a once daily task using the "Scheduler Send
+    Mail Command" that you saw in your logs. It should look something like:
+
+        curl -XPOST 'http://a:eyJ0eXAi9287349182374iOiJIUzI1NiJ9.eyJpYXQi987349238742NDZ9.8fzBdgMY9o798172918723E68F8fZNMSE5GLRiLg7fzI@localhost:3000/jobs/send'
+    
+    You should set the time of the task to run when you'd like to receive your
+    email. Make sure you take timezone into account.
+
+12. Add your target send URL to Cloudmailin
+
+        heroku addons:open cloudmailin
+        
+    In the resulting dashboard, click Edit Target and then add the "Cloudmailin
+    Target URL" that you saw in your logs. It should look something like:
+    
+        http://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@localhost:3000/emails
+
+    You can leave the default delivery option (Multipart) selected.
+    
+13. There is no step 13! Wasn't that easy?
+    
+    You should receive an email at the time you specified in your scheduler and
+    from there you can just follow the instructions. If you ever want to see
+    your old entries just click the link in the email.
+    
+    If you'd like to send a test email right now to make sure it's all working
+    just paste your "Scheduler Send Mail Command" into your terminal and you
+    should get an email within a few minutes.
+    
+    Enjoy!
 
 # Running Locally
 
