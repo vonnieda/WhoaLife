@@ -38,11 +38,11 @@ accumulated.
     
 4. Set your email address
 
-        heroku config:set EMAIL='YOUR_EMAIL_ADDRESS'
+        heroku config:set EMAIL='your@emailaddress.com'
     
 5. Set your full name
     
-        heroku config:set NAME='YOUR_NAME'
+        heroku config:set NAME='Your Name'
     
 6. Note the URL of your application. You will need it for the next command.
 
