@@ -24,8 +24,8 @@
     {{#entries}}
         <div class="row">
             <div class="col-md-4 col-md-offset-4">
-                <h1>{{{ formattedDate }}}</h1>
-                <h2>{{{ formattedDay }}}</h2>
+                <h2>{{{ formattedDate }}}</h2>
+                <h3>{{{ formattedDay }}}</h3>
                 {{{ formattedText }}}
                 <br>
             </div>
