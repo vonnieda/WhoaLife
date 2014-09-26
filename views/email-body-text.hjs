@@ -1,8 +1,10 @@
 Just reply to this email with your entry.
 
+{{#previousEntryDate}}
 Oh snap, remember this? {{{ previousEntryDate }}} you wrote...
 
 {{{ previousEntryBody }}}
 
+{{/previousEntryDate}}
 You can see your past entries here:
 {{{ previousEntriesUrl }}}

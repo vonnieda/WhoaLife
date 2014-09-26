@@ -3,10 +3,12 @@
 <body>
 Just reply to this email with your entry.<br>
 <br>
+{{#previousEntryDate}}
 Oh snap, remember this? {{{ previousEntryDate }}} you wrote...<br>
 <br>
 {{{ previousEntryBody }}}<br>
 <br>
+{{/previousEntryDate}}
 <a href="{{{ previousEntriesUrl }}}">Past entries</a>
 </body>
 </html>

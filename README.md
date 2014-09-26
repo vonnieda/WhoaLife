@@ -56,6 +56,10 @@ http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 10. Look at the logs to get some important URLs. You are looking for text like
 the below. You'll need those URLs for the next two tasks.
 
+        heroku logs --tail
+        
+    It may take a few minutes to appear, but look for this:        
+
         WhoaLife
     
         Scheduler Send Mail Command: curl -XPOST 'http://a:eyJ0eXAi9287349182374iOiJIUzI1NiJ9.eyJpYXQi987349238742NDZ9.8fzBdgMY9o798172918723E68F8fZNMSE5GLRiLg7fzI@localhost:3000/jobs/send'

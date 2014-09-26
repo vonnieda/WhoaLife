@@ -134,19 +134,23 @@ app.post('/jobs/send', function(req, res, next) {
         body : ['previousEntry', function(callback, results) {
             var previousEntry = results.previousEntry;
             var params = {
-                previousEntryDate: moment(previousEntry.createdAt).fromNow(),
-                previousEntryBody : previousEntry.text,
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
+            if (previousEntry) {
+                params.previousEntryDate = moment(previousEntry.createdAt).fromNow();
+                params.previousEntryBody = previousEntry.text;
+            }
             app.render('email-body-text', params, callback);
         }],
         bodyHtml : ['previousEntry', function(callback, results) {
             var previousEntry = results.previousEntry;
             var params = {
-                previousEntryDate: moment(previousEntry.createdAt).fromNow(),
-                previousEntryBody : previousEntry.text.replace(/\n/g, '<br>'),
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
+            if (previousEntry) {
+                previousEntryDate = moment(previousEntry.createdAt).fromNow();
+                previousEntryBody = previousEntry.text.replace(/\n/g, '<br>');
+            }
             app.render('email-body-html', params, callback);
         }]
     }, function(err, results) {
