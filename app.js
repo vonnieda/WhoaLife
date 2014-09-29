@@ -125,7 +125,6 @@ app.post('/jobs/send', function(req, res, next) {
         previousEntry : getRandomEntry,
         subject : [function(callback, results) {
             var date = moment().format('dddd, MMM Do');
-            date = date.charAt(0).toUpperCase() + date.slice(1);
             var params = {
                 date : date
             };
@@ -137,7 +136,7 @@ app.post('/jobs/send', function(req, res, next) {
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             if (previousEntry) {
-                params.previousEntryDate = moment(previousEntry.createdAt).fromNow();
+                params.previousEntryDate = capitalize(moment(previousEntry.createdAt).fromNow());
                 params.previousEntryBody = previousEntry.text;
             }
             app.render('email-body-text', params, callback);
@@ -148,7 +147,7 @@ app.post('/jobs/send', function(req, res, next) {
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             if (previousEntry) {
-                params.previousEntryDate = moment(previousEntry.createdAt).fromNow();
+                params.previousEntryDate = capitalize(moment(previousEntry.createdAt).fromNow());
                 params.previousEntryBody = previousEntry.text.replace(/\n/g, '<br>');
             }
             app.render('email-body-html', params, callback);
@@ -236,6 +235,13 @@ function getEntries(callback) {
             return _.omit(doc, '_id');
         }));
     });
+}
+
+function capitalize(str) {
+    if (!str || !str.length) {
+        return str;
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 entries.index('createdAt');
