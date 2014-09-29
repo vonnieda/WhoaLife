@@ -8,7 +8,8 @@ var async = require('async'),
     moment = require('moment'),
     path = require('path'),
     URL = require('url'),
-    basicAuth = require('basic-auth');
+    basicAuth = require('basic-auth'),
+    email = require('./lib/email');
 
 var config = {
     mongoDbUrl : process.env.MONGOHQ_URL,
@@ -100,7 +101,7 @@ app.post('/emails', function(req, res, next) {
         }
         var doc = {
             createdAt : new Date(),
-            text : fields.plain
+            text : email.extractEmailText(fields.plain)
         };
         createEntry(doc, function(err) {
             if (err) {
@@ -177,40 +178,6 @@ app.post('/jobs/send', function(req, res, next) {
         });
     });
 });
-
-/**
- * Attempts to extract only the message from the email.
- * @param email
- */
-function extractEmailText(email) {
-    var lines = email.split(/\r?\n/);
-    console.dir(lines);
-    // find the first line that looks like quoted text
-    var firstIndex = -1;
-    for (var i = 0; i < lines.length; i++) {
-        if (/^>/.test(lines[i])) {
-            firstIndex = i;
-            break;
-        }
-    }
-    var lastIndex = -1;
-    for (var i = lines.length - 1; i >= 0; i--) {
-        if (/^>/.test(lines[i])) {
-            lastIndex = i;
-            break;
-        }
-    }
-    if (firstIndex == -1) {
-        return lines.join('\n');
-    }
-    lines = _.reject(lines, function(item, index) {
-        return (index >= firstIndex && index <= lastIndex);
-    });
-    // find the last line that looks like quoted text
-    // see if the line before the first line looks like quote header
-    // remove
-    return lines.join('\n');
-}
 
 function getRandomEntry(callback) {
     getEntries(function(err, entries) {
