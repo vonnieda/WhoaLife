@@ -4,7 +4,7 @@
 Just reply to this email with your entry.<br>
 <br>
 {{#previousEntryDate}}
-Oh snap, remember this? {{{ previousEntryDate }}} you wrote...<br>
+Oh snap, remember this? {{{ previousEntryDate }}} ago you wrote...<br>
 <br>
 {{{ previousEntryBody }}}<br>
 <br>

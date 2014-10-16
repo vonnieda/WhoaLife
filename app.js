@@ -6,6 +6,7 @@ var async = require('async'),
     jwt = require('jsonwebtoken'),
     _ = require('underscore'),
     moment = require('moment'),
+    countdown = require('countdown'),
     path = require('path'),
     URL = require('url'),
     basicAuth = require('basic-auth'),
@@ -81,7 +82,11 @@ app.get('/', function(req, res, next) {
         _.each(entries, function(entry) {
             entry.formattedDate = moment(entry.createdAt).format('MMMM Do YYYY');
             entry.formattedDay = moment(entry.createdAt).format('dddd');
-            entry.formattedText = entry.text.replace(/\n/g, '<br>');
+            entry.formattedText = '<p>' + entry.text;
+            entry.formattedText = entry.formattedText.replace(/\r/g, '');
+            entry.formattedText = entry.formattedText.replace(/\n\n/g, '<p>');
+            entry.formattedText = entry.formattedText.replace(/\n/g, ' ');
+            entry.formattedText = entry.formattedText.trim();
         });
         res.render('index', {
             name : config.name,
@@ -137,7 +142,7 @@ app.post('/jobs/send', function(req, res, next) {
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             if (previousEntry) {
-                params.previousEntryDate = capitalize(moment(previousEntry.createdAt).fromNow());
+                params.previousEntryDate = capitalize(countdown(previousEntry.createdAt, null, null, 2));
                 params.previousEntryBody = previousEntry.text;
             }
             app.render('email-body-text', params, callback);
@@ -148,7 +153,7 @@ app.post('/jobs/send', function(req, res, next) {
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             if (previousEntry) {
-                params.previousEntryDate = capitalize(moment(previousEntry.createdAt).fromNow());
+                params.previousEntryDate = capitalize(countdown(previousEntry.createdAt, null, null, 2));
                 params.previousEntryBody = previousEntry.text.replace(/\n/g, '<br>');
             }
             app.render('email-body-html', params, callback);
