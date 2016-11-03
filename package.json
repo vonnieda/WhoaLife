@@ -18,7 +18,7 @@
     "hjs": "0.0.6",
     "jsonwebtoken": "^1.1.2",
     "moment": "^2.8.3",
-    "monk": "^0.9.0",
+    "monk": "^3.1.3",
     "morgan": "~1.3.0",
     "sendgrid": "^1.2.0",
     "underscore": "^1.7.0"
