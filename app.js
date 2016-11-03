@@ -198,7 +198,7 @@ function createEntry(entry, callback) {
 }
 
 function getEntries(callback) {
-    entries.find({ $query : {}, $orderby : { createdAt : -1 }}, function(err, docs) {
+    entries.find({}, { sort : { createdAt : -1 }}, function(err, docs) {
         if (err) {
             return callback(err);
         }
