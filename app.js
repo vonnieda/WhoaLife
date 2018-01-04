@@ -121,7 +121,7 @@ app.post('/jobs/send', function(req, res, next) {
     function createPreviousEntriesUrl(webRoot) {
         var token = jwt.sign({},
             config.jwtSecret,
-            { expiresInMinutes : 60 * 24 });
+            { expiresIn : '24h' });
         var url = URL.parse(webRoot);
         url.auth = 'a:' + token;
         return URL.format(url);
