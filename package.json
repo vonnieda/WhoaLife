@@ -6,6 +6,9 @@
     "start": "env $(heroku config -s) nodemon bin/www",
     "postinstall": "bower install"
   },
+  "engines": {
+    "node": "8.9.4"
+  },
   "dependencies": {
     "async": "^0.9.0",
     "basic-auth": "^1.0.0",
