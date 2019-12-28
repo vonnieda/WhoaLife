@@ -17,7 +17,7 @@ const config = {
     sendgridUsername: process.env.SENDGRID_USERNAME,
     sendgridPassword: process.env.SENDGRID_PASSWORD,
     cloudmailinForwardAddress: process.env.CLOUDMAILIN_FORWARD_ADDRESS,
-    jwtSecret: process.env.JWT_SECRET || process.env.MONGOHQ_URL,
+    jwtSecret: process.env.JWT_SECRET || process.env.DATABASE_URL,
     name : process.env.NAME,
     email : process.env.EMAIL,
     webRoot : process.env.WEB_ROOT.replace(/\/$/, '')
@@ -196,7 +196,6 @@ function getRandomEntry(callback) {
 }
 
 function createEntry(entry, callback) {
-    console.log(entry);
     db.query('insert into entries (createdAt, text) values ($1, $2)', [entry.createdAt, entry.text], function(err, res) {
         if (err) {
             return callback(err);
