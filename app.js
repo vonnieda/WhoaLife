@@ -1,4 +1,4 @@
-var async = require('async'),
+const async = require('async'),
     express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
@@ -10,10 +10,10 @@ var async = require('async'),
     path = require('path'),
     URL = require('url'),
     basicAuth = require('basic-auth'),
-    email = require('./lib/email');
+    email = require('./lib/email'),
+    { Pool } = require('pg');
 
-var config = {
-    mongoDbUrl : process.env.MONGOHQ_URL,
+const config = {
     sendgridUsername: process.env.SENDGRID_USERNAME,
     sendgridPassword: process.env.SENDGRID_PASSWORD,
     cloudmailinForwardAddress: process.env.CLOUDMAILIN_FORWARD_ADDRESS,
@@ -23,10 +23,12 @@ var config = {
     webRoot : process.env.WEB_ROOT.replace(/\/$/, '')
 };
 
-var db = require('monk')(config.mongoDbUrl),
-    entries = db.get('entries'),
-    sendgrid  = require('sendgrid')(config.sendgridUsername, config.sendgridPassword);
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true,
+});
 
+const sendgrid  = require('sendgrid')(config.sendgridUsername, config.sendgridPassword);
 
 var app = express();
 
@@ -194,20 +196,25 @@ function getRandomEntry(callback) {
 }
 
 function createEntry(entry, callback) {
-    entries.insert(entry, callback);
-}
-
-function getEntries(callback) {
-    entries.find({}, { sort : { createdAt : -1 }}, function(err, docs) {
+    console.log(entry);
+    db.query('insert into entries (createdAt, text) values ($1, $2)', [entry.createdAt, entry.text], function(err, res) {
         if (err) {
             return callback(err);
         }
 
-        return callback(null, _.map(docs, function(doc) {
-            return _.omit(doc, '_id');
-        }));
+        return callback(null, res.rows);
     });
 }
+
+function getEntries(callback) {
+    db.query('select * from entries order by createdAt desc', function(err, res) {
+        if (err) {
+            return callback(err);
+        }
+
+        return callback(null, res.rows);
+    });
+};
 
 function capitalize(str) {
     if (!str || !str.length) {
@@ -215,8 +222,6 @@ function capitalize(str) {
     }
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
-
-entries.index('createdAt');
 
 module.exports = app;
 
