@@ -36,12 +36,9 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hjs');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-//app.use(cookieParser());
 app.use(busboy({
     immediate : true,
     limits : {
@@ -76,24 +73,20 @@ app.use(function (req, res, next) {
     });
 });
 
-app.get('/', function(req, res, next) {
-    getEntries(function(err, entries) {
-        if (err) {
-            return next(err);
-        }
-        _.each(entries, function(entry) {
-            entry.formattedDate = moment(entry.createdAt).format('MMMM Do YYYY');
-            entry.formattedDay = moment(entry.createdAt).format('dddd');
-            entry.formattedText = '<p>' + entry.text;
-            entry.formattedText = entry.formattedText.replace(/\r/g, '');
-            entry.formattedText = entry.formattedText.replace(/\n\n/g, '<p>');
-            entry.formattedText = entry.formattedText.replace(/\n/g, ' ');
-            entry.formattedText = entry.formattedText.trim();
-        });
-        res.render('index', {
-            name : config.name,
-            entries : entries
-        });
+app.get('/', async function(req, res, next) {
+    const entries = await getEntries();
+    _.each(entries, function(entry) {
+        entry.formattedDate = moment(entry.createdat).format('MMMM Do YYYY');
+        entry.formattedDay = moment(entry.createdat).format('dddd');
+        entry.formattedText = '<p>' + entry.text;
+        entry.formattedText = entry.formattedText.replace(/\r/g, '');
+        entry.formattedText = entry.formattedText.replace(/\n\n/g, '<p>');
+        entry.formattedText = entry.formattedText.replace(/\n/g, ' ');
+        entry.formattedText = entry.formattedText.trim();
+    });
+    res.render('index', {
+        name : config.name,
+        entries : entries
     });
 });
 
@@ -107,7 +100,7 @@ app.post('/emails', function(req, res, next) {
             return res.status(404).end();
         }
         var doc = {
-            createdAt : new Date(),
+            createdat : new Date(),
             text : email.extractEmailText(fields.plain)
         };
         createEntry(doc, function(err) {
@@ -144,7 +137,7 @@ app.post('/jobs/send', function(req, res, next) {
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             if (previousEntry) {
-                params.previousEntryDate = capitalize(countdown(previousEntry.createdAt, null, null, 2));
+                params.previousEntryDate = capitalize(countdown(previousEntry.createdat, null, null, 2));
                 params.previousEntryBody = previousEntry.text;
             }
             app.render('email-body-text', params, callback);
@@ -155,7 +148,7 @@ app.post('/jobs/send', function(req, res, next) {
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             if (previousEntry) {
-                params.previousEntryDate = capitalize(countdown(previousEntry.createdAt, null, null, 2));
+                params.previousEntryDate = capitalize(countdown(previousEntry.createdat, null, null, 2));
                 params.previousEntryBody = previousEntry.text.replace(/\n/g, '<br>');
             }
             app.render('email-body-html', params, callback);
@@ -186,17 +179,30 @@ app.post('/jobs/send', function(req, res, next) {
     });
 });
 
-function getRandomEntry(callback) {
-    getEntries(function(err, entries) {
-        if (err) {
-            return callback(err);
-        }
-        return callback(err, _.sample(entries));
-    });
+async function getRandomEntry() {
+    var { rows } = await db.query(`
+        select * from entries 
+        where date_part('month', createdat) = date_part('month', now()) 
+            and date_part('day', createdat) = date_part('day', now())
+    `);
+    if (!rows.length) {
+        var { rows } = await db.query("select * from entries where date_part('dow', createdat) = date_part('dow', now())");
+    }
+    if (!rows.length) {
+        var { rows } = await db.query("select * from entries where date_part('day', createdat) = date_part('day', now())");
+    }
+    if (!rows.length) {
+        var { rows } = await db.query("select * from entries");
+    }
+    return _.sample(rows);
+}
+
+async function getEntries() {
+    return (await db.query('select * from entries order by createdat desc')).rows;
 }
 
 function createEntry(entry, callback) {
-    db.query('insert into entries (createdAt, text) values ($1, $2)', [entry.createdAt, entry.text], function(err, res) {
+    db.query('insert into entries (createdat, text) values ($1, $2)', [entry.createdat, entry.text], function(err, res) {
         if (err) {
             return callback(err);
         }
@@ -204,16 +210,6 @@ function createEntry(entry, callback) {
         return callback(null, res.rows);
     });
 }
-
-function getEntries(callback) {
-    db.query('select * from entries order by createdAt desc', function(err, res) {
-        if (err) {
-            return callback(err);
-        }
-
-        return callback(null, res.rows);
-    });
-};
 
 function capitalize(str) {
     if (!str || !str.length) {
