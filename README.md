@@ -48,7 +48,7 @@ accumulated.
 
 4. Load the database schema
 
-        heroku pg:psql -c 'create table entries (createdAt timestamp with time zone, text text);'
+        heroku pg:psql -c 'create table entries (createdat timestamp with time zone, text text);'
     
 5. Set your email address
 

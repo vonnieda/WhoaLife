@@ -82,8 +82,8 @@ app.get('/', function(req, res, next) {
             return next(err);
         }
         _.each(entries, function(entry) {
-            entry.formattedDate = moment(entry.createdAt).format('MMMM Do YYYY');
-            entry.formattedDay = moment(entry.createdAt).format('dddd');
+            entry.formattedDate = moment(entry.createdat).format('MMMM Do YYYY');
+            entry.formattedDay = moment(entry.createdat).format('dddd');
             entry.formattedText = '<p>' + entry.text;
             entry.formattedText = entry.formattedText.replace(/\r/g, '');
             entry.formattedText = entry.formattedText.replace(/\n\n/g, '<p>');
@@ -107,7 +107,7 @@ app.post('/emails', function(req, res, next) {
             return res.status(404).end();
         }
         var doc = {
-            createdAt : new Date(),
+            createdat : new Date(),
             text : email.extractEmailText(fields.plain)
         };
         createEntry(doc, function(err) {
@@ -144,7 +144,7 @@ app.post('/jobs/send', function(req, res, next) {
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             if (previousEntry) {
-                params.previousEntryDate = capitalize(countdown(previousEntry.createdAt, null, null, 2));
+                params.previousEntryDate = capitalize(countdown(previousEntry.createdat, null, null, 2));
                 params.previousEntryBody = previousEntry.text;
             }
             app.render('email-body-text', params, callback);
@@ -155,7 +155,7 @@ app.post('/jobs/send', function(req, res, next) {
                 previousEntriesUrl : createPreviousEntriesUrl(config.webRoot)
             };
             if (previousEntry) {
-                params.previousEntryDate = capitalize(countdown(previousEntry.createdAt, null, null, 2));
+                params.previousEntryDate = capitalize(countdown(previousEntry.createdat, null, null, 2));
                 params.previousEntryBody = previousEntry.text.replace(/\n/g, '<br>');
             }
             app.render('email-body-html', params, callback);
@@ -196,7 +196,7 @@ function getRandomEntry(callback) {
 }
 
 function createEntry(entry, callback) {
-    db.query('insert into entries (createdAt, text) values ($1, $2)', [entry.createdAt, entry.text], function(err, res) {
+    db.query('insert into entries (createdat, text) values ($1, $2)', [entry.createdat, entry.text], function(err, res) {
         if (err) {
             return callback(err);
         }
@@ -206,7 +206,7 @@ function createEntry(entry, callback) {
 }
 
 function getEntries(callback) {
-    db.query('select * from entries order by createdAt desc', function(err, res) {
+    db.query('select * from entries order by createdat desc', function(err, res) {
         if (err) {
             return callback(err);
         }
