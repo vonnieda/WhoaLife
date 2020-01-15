@@ -1,11 +1,11 @@
 {
   "name": "WhoaLife",
-  "description": "A private, once a day diary that emails you to ask, 'How did your day go?'.",
+  "description": "A private, once a day diary that emails you to ask, \"How did your day go?\".",
   "website": "https://github.com/vonnieda/WhoaLife",
   "repository": "https://github.com/vonnieda/WhoaLife",
   "success_url": "/welcome",
   "scripts": {
-    "postdeploy": "heroku pg:psql -c 'create table entries (createdat timestamp with time zone, text text); insert into entries values (now(), \"Today I started my WhoaLife diary.\");'"
+    "postdeploy": "node setup.js"
   },
   "env": {
     "JWT_SECRET": {
