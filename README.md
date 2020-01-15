@@ -20,8 +20,8 @@ as good as OhLife was, but it'll do. It'll do.
 
 # Installation
 
-This app is designed to be run on Heroku. You can run it elsewhere but you'll
-need to have your own MongoDB instance and a way to run scheduled tasks.
+This app is designed to be run on Heroku. If you run it elsewhere you'll
+need to have your own Postgres instance and a way to run scheduled tasks.
 
 WhoaLife is a single user application. It's just for you. If someone else wants
 to use it they'll have to set up their own.
@@ -49,6 +49,7 @@ accumulated.
 4. Load the database schema
 
         heroku pg:psql -c 'create table entries (createdat timestamp with time zone, text text);'
+        heroku pg:psql -c 'insert into entries values (now(), "Today I started my WhoaLife diary.");'
     
 5. Set your email address
 
@@ -130,7 +131,7 @@ the below. You'll need those URLs for the next two tasks.
 
 # How It Works
 
-WhoaLife is a simple Node.js application based on Express. It uses MongoDB for
+WhoaLife is a simple Node.js application based on Express. It uses Postgres for
 data storage and a number of Heroku services to help it along. It only does
 three things:
 
