@@ -1,7 +1,7 @@
 # WhoaLife
 
 WhoaLife is a private daily diary that emails you once a day to ask
-you how. Just reply to the email and the diary entry is saved. You can
+you how your day went. Just reply to the email and the diary entry is saved. You can
 see all your entries by clicking the link in the email, and you get to see
 one of your older entries in each email.
 
