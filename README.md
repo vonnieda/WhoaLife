@@ -1,9 +1,11 @@
 # WhoaLife
 
-An homage to the excellent, but short lived, OhLife daily diary system.
+WhoaLife is a private daily diary that emails you once a day to ask
+you how. Just reply to the email and the diary entry is saved. You can
+see all your entries by clicking the link in the email, and you get to see
+one of your older entries in each email.
 
-WhoaLife will email you once a day and ask you how your day went. Just reply
-to the email and your diary grows.
+WhoaLife is an homage to the excellent, but short lived, OhLife daily diary system.
 
 # Why
 
@@ -20,68 +22,26 @@ as good as OhLife was, but it'll do. It'll do.
 
 # Installation
 
-This app is designed to be run on Heroku. You can run it elsewhere but you'll
-need to have your own MongoDB instance and a way to run scheduled tasks.
-
-WhoaLife is a single user application. It's just for you. If someone else wants
-to use it they'll have to set up their own.
+WhoaLife is a single user application that runs for free on Heroku. It's just
+for you. If someone else wants to use it they'll have to set up their own.
 
 The following instructions assume you already have a verified Heroku account. If
 you don't you'll need to set one up first. While this does require a verified
 account, all of the services used are free so no charges should actually be
 accumulated.
 
-1. Create an app on Heroku
+1. Deploy WhoaLife to your Heroku account
 
-        heroku create
+    [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
     
-2. Optionally rename the app to something you like
+2. Fill out the Heroku deployment form and start the deploy. 
 
-        heroku apps:rename YOUR_APP_NAME
-    
-3. Add the required plugins
+    When it's finished, click Manage.
 
-        heroku addons:add heroku-postgresql
-        heroku addons:add sendgrid
-        heroku addons:add cloudmailin
-        heroku addons:add scheduler
+3. In the More menu, select View logs
 
-4. Load the database schema
-
-        heroku pg:psql -c 'create table entries (createdat timestamp with time zone, text text);'
-    
-5. Set your email address
-
-        heroku config:set EMAIL='your@emailaddress.com'
-
-6. Set your full name
-    
-        heroku config:set NAME='Your Name'
-    
-7. Note the URL of your application. You will need it for the next command.
-
-        heroku apps:info | grep 'Web URL'    
-    
-8. Set the URL for the application. This is the URL from the previous command. I
-recommend changing the http to https for better security.
-
-        heroku config:set WEB_ROOT='https://YOUR_APP_NAME.herokoapp.com'
-    
-9. Set your timezone. There is a list available at:
-http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-     
-        heroku config:set TZ='America/Los_Angeles'
-    
-10. Deploy the app
-
-        git push heroku master
-    
-11. Look at the logs to get some important URLs. You are looking for text like
+4. Look at the logs to get some important URLs. You are looking for text like
 the below. You'll need those URLs for the next two tasks.
-
-        heroku logs --tail
-        
-    It may take a few minutes to appear, but look for this:        
 
         WhoaLife
     
@@ -89,10 +49,8 @@ the below. You'll need those URLs for the next two tasks.
     
         Cloudmailin Target URL: https://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@whoalife.herokuapp.com/emails
     
-12. Add a scheduled task to send your daily email
+4. On your Heroku dashboard open the Scheduler addon.
 
-        heroku addons:open scheduler
-    
     In the resulting dashboard, add a once daily task using the "Scheduler Send
     Mail Command" that you saw in your logs. It should look something like:
 
@@ -101,10 +59,8 @@ the below. You'll need those URLs for the next two tasks.
     You should set the time of the task to run when you'd like to receive your
     email. Make sure you take timezone into account.
 
-13. Add your target send URL to Cloudmailin
+5. On your Heroku dashboard open the Cloudmailin addon.
 
-        heroku addons:open cloudmailin
-        
     In the resulting dashboard, click Edit Target and then add the "Cloudmailin
     Target URL" that you saw in your logs. It should look something like:
     
@@ -112,7 +68,7 @@ the below. You'll need those URLs for the next two tasks.
 
     You can leave the default delivery option (Multipart) selected.
     
-14. There is no step 14! Wasn't that easy?
+6. There is no step 6! Wasn't that easy?
     
     You should receive an email at the time you specified in your scheduler and
     from there you can just follow the instructions. If you ever want to see
@@ -126,11 +82,12 @@ the below. You'll need those URLs for the next two tasks.
 
 # Running Locally
 
+    heroku config -s > .env
     npm start
 
 # How It Works
 
-WhoaLife is a simple Node.js application based on Express. It uses MongoDB for
+WhoaLife is a simple Node.js application based on Express. It uses Postgres for
 data storage and a number of Heroku services to help it along. It only does
 three things:
 

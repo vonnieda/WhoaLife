@@ -205,7 +205,7 @@ async function getRandomEntry() {
         rows = (await db.query("select * from entries where date_part('day', createdat) = date_part('day', now())")).rows;
     }
     if (!rows.length) {
-        rows = (await db.query("select * from entries"));
+        rows = (await db.query("select * from entries")).rows;
     }
     return _.sample(rows);
 }

@@ -1,0 +1,42 @@
+{
+  "name": "WhoaLife",
+  "description": "A private, once a day diary that emails you to ask, \"How did your day go?\".",
+  "website": "https://github.com/vonnieda/WhoaLife",
+  "repository": "https://github.com/vonnieda/WhoaLife",
+  "scripts": {
+    "postdeploy": "node setup.js"
+  },
+  "env": {
+    "JWT_SECRET": {
+      "description": "A secret key for verifying the integrity of JWT authentication tokens.",
+      "generator": "secret"
+    },
+    "NAME": {
+      "description": "Your name. Emails to you will include your name. Computers are amazing!",
+      "value" : "Sam",
+      "required" : true
+    },
+    "EMAIL": {
+      "description": "Your email address. Daily messages will be sent here.",
+      "value" : "your@email.com",
+      "required" : true
+    },
+    "TZ": {
+      "description": "The timezone you live in, so that dates and times are correct. There's a list at http://en.wikipedia.org/wiki/List_of_tz_database_time_zones.",
+      "value" : "America/Chicago",
+      "required" : true
+    },
+    "WEB_ROOT" : {
+      "description": "The web root for this application. Just substitute YOUR_APP_NAME below with the name you entered above.",
+      "value" : "https://YOUR_APP_NAME.herokuapp.com",
+      "required" : true
+    }
+  },
+  "addons": [
+    "cloudmailin",
+    "heroku-postgresql",
+    "scheduler",
+    "sendgrid"
+  ]
+}
+
