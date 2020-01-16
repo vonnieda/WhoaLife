@@ -3,7 +3,6 @@
   "description": "A private, once a day diary that emails you to ask, \"How did your day go?\".",
   "website": "https://github.com/vonnieda/WhoaLife",
   "repository": "https://github.com/vonnieda/WhoaLife",
-  "success_url": "/welcome",
   "scripts": {
     "postdeploy": "node setup.js"
   },
