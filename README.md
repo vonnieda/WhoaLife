@@ -32,9 +32,11 @@ accumulated.
 
 1. Deploy WhoaLife to your Heroku account
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+    [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
     
-2. Fill out the Heroku deployment form and start the deploy 
+2. Fill out the Heroku deployment form and start the deploy. 
+
+    When it's finished, click Manage.
 
 3. In the More menu, select View logs
 
