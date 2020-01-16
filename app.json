@@ -23,8 +23,13 @@
       "required" : true
     },
     "TZ": {
-      "description": "The timezone you live in, so that dates and times are correct. There's a list at http://en.wikipedia.org/wiki/List_of_tz_database_time_zones",
+      "description": "The timezone you live in, so that dates and times are correct. There's a list at http://en.wikipedia.org/wiki/List_of_tz_database_time_zones.",
       "value" : "America/Chicago",
+      "required" : true
+    },
+    "WEB_ROOT" : {
+      "description": "The web root for this application. Just substitute YOUR_APP_NAME below with the name you entered above.",
+      "value" : "https://YOUR_APP_NAME.herokuapp.com",
       "required" : true
     }
   },
