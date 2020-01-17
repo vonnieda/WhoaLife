@@ -10,19 +10,18 @@
     "node": "8.9.4"
   },
   "dependencies": {
-    "async": "^0.9.0",
-    "basic-auth": "^1.0.0",
+    "basic-auth": "^1.1.0",
     "body-parser": "^1.19.0",
     "connect-busboy": "0.0.1",
     "countdown": "^2.3.0",
     "express": "^4.17.1",
     "hjs": "0.0.6",
-    "jsonwebtoken": "^8.1.0",
+    "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
-    "pg": "^7.16.1",
+    "pg": "^7.17.1",
     "sendgrid": "^1.2.0",
-    "underscore": "^1.7.0"
+    "underscore": "^1.9.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

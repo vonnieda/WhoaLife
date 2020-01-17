@@ -1,5 +1,4 @@
-const async = require('async'),
-    express = require('express'),
+const express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
     busboy = require('connect-busboy'),
