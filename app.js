@@ -1,5 +1,6 @@
 const async = require('async'),
     express = require('express'),
+    logger = require('morgan'),
     bodyParser = require('body-parser'),
     busboy = require('connect-busboy'),
     jwt = require('jsonwebtoken'),
@@ -35,6 +36,7 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hjs');
 
+app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(busboy({
@@ -44,8 +46,7 @@ app.use(busboy({
         fileSize : -1
     }
 }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/pkgs', express.static(path.join(__dirname, '/bower_components')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 /**
  * Convert app.render to an async function for use in async routes.
