@@ -105,7 +105,6 @@ app.get('/', async function(req, res, next) {
 
 app.post('/emails', async function(req, res, next) {
     try {
-        console.log(req.body);
         if (!req.body.plain) {
             return res.status(404).end();
         }
