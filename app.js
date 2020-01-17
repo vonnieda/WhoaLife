@@ -1,7 +1,6 @@
 const express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
-    busboy = require('connect-busboy'),
     jwt = require('jsonwebtoken'),
     _ = require('underscore'),
     moment = require('moment'),
@@ -37,14 +36,6 @@ app.set('view engine', 'hjs');
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(busboy({
-    immediate : true,
-    limits : {
-        files : -1,
-        fileSize : -1
-    }
-}));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 /**
@@ -108,30 +99,26 @@ app.get('/', async function(req, res, next) {
         });
     }
     catch (err) {
-        next(err);
+        return next(err);
     }
 });
 
-app.post('/emails', function(req, res, next) {
-    const fields = {};
-    req.busboy.on('field', function(field, value) {
-        fields[field] = value;
-    });
-    req.busboy.on('finish', function() {
-        if (!fields.plain) {
+app.post('/emails', async function(req, res, next) {
+    try {
+        console.log(req.body);
+        if (!req.body.plain) {
             return res.status(404).end();
         }
         const doc = {
             createdat : new Date(),
-            text : email.extractEmailText(fields.plain)
+            text : email.extractEmailText(req.body.plain)
         };
-        createEntry(doc, function(err) {
-            if (err) {
-                return next(err);
-            }
-            res.status(200).end();
-        });
-    });
+        await createEntry(doc);
+        res.status(200).end();
+    }
+    catch (err) {
+        return next(err);
+    }
 });
 
 app.post('/jobs/send', async function(req, res, next) {
@@ -212,14 +199,8 @@ async function getEntries() {
     return (await db.query('select * from entries order by createdat desc')).rows;
 }
 
-function createEntry(entry, callback) {
-    db.query('insert into entries (createdat, text) values ($1, $2)', [entry.createdat, entry.text], function(err, res) {
-        if (err) {
-            return callback(err);
-        }
-
-        return callback(null, res.rows);
-    });
+async function createEntry(entry) {
+    return (await db.query('insert into entries (createdat, text) values ($1, $2)', [entry.createdat, entry.text])).rows;
 }
 
 function capitalize(str) {
