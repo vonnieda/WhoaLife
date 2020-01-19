@@ -16,7 +16,10 @@ const config = {
     jwtSecret: process.env.JWT_SECRET || process.env.DATABASE_URL,
     name : process.env.NAME,
     email : process.env.EMAIL,
-    webRoot : process.env.WEB_ROOT.replace(/\/$/, '')
+    webRoot : process.env.WEB_ROOT.replace(/\/$/, ''),
+    mailgunApiKey: process.env.MAILGUN_API_KEY,
+    mailgunDomain: process.env.MAILGUN_DOMAIN,
+
 };
 
 const db = new Pool({
@@ -28,8 +31,8 @@ const nodemailer = require('nodemailer');
 const mg = require('nodemailer-mailgun-transport');
 const auth = {
     auth: {
-        api_key: process.env.MAILGUN_API_KEY,
-        domain: process.env.MAILGUN_DOMAIN,
+        api_key: config.mailgunApiKey,
+        domain: config.mailgunDomain,
     },
 }
 const nodemailerMailgun = nodemailer.createTransport(mg(auth));
@@ -69,7 +72,7 @@ async function render(name, options) {
 
 /**
  * Simple HTTP basic auth that looks for a valid, signed JWT in the password
- * field. Username is ignored.
+ * field. Username is ignored. If the JWT is valid it is set as req.user.
  */
 app.use(function (req, res, next) {
     function unauthorized(res) {
@@ -83,16 +86,25 @@ app.use(function (req, res, next) {
         return unauthorized(res);
     };
 
-    jwt.verify(user.pass, config.jwtSecret, function(err, jwt) {
-        if (err) {
-            return unauthorized(res);
-        }
-        return next();
-    });
+    jwt.verify(user.pass,
+        config.jwtSecret,
+        {
+            algorithms : ['HS256'],
+        },
+        function(err, jwt) {
+            if (err) {
+                return unauthorized(res);
+            }
+            req.user = jwt;
+            return next();
+        });
 });
 
 app.get('/', async function(req, res, next) {
     try {
+        if (!req.user.read) {
+            return res.status(401).end();
+        }
         const entries = await getEntries();
         _.each(entries, function (entry) {
             entry.formattedDate = moment(entry.createdat).format('MMMM Do YYYY');
@@ -115,6 +127,9 @@ app.get('/', async function(req, res, next) {
 
 app.post('/emails', async function(req, res, next) {
     try {
+        if (!req.user.write) {
+            return res.status(401).end();
+        }
         if (!req.body.plain) {
             return res.status(404).end();
         }
@@ -132,15 +147,24 @@ app.post('/emails', async function(req, res, next) {
 
 app.post('/jobs/send', async function(req, res, next) {
     function createPreviousEntriesUrl(webRoot) {
-        const token = jwt.sign({},
+        const token = jwt.sign({
+                read : true,
+            },
             config.jwtSecret,
-            { expiresIn : '24h' });
+            {
+                algorithm : 'HS256',
+                expiresIn : '24h',
+            });
         const url = URL.parse(webRoot);
         url.auth = 'a:' + token;
         return URL.format(url);
     }
 
     try {
+        if (!req.user.write) {
+            return res.status(401).end();
+        }
+
         const previousEntry = await getRandomEntry();
         const previousEntriesUrl = createPreviousEntriesUrl(config.webRoot);
 
@@ -218,7 +242,13 @@ function capitalize(str) {
 module.exports = app;
 
 // Print handy startup messages
-const token = jwt.sign({}, config.jwtSecret);
+const token = jwt.sign({
+        write: true,
+    },
+    config.jwtSecret,
+    {
+        algorithm : 'HS256',
+    });
 let url = URL.parse(config.webRoot);
 url.auth = 'a:' + token;
 url = URL.format(url);
