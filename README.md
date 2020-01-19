@@ -66,7 +66,7 @@ the below. You'll need those URLs for the next two tasks.
     
         https://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@whoalife.herokuapp.com/emails
 
-    You can leave the default delivery option (Multipart) selected.
+    Set the POST Format to JSON Format.
     
 6. There is no step 6! Wasn't that easy?
     
@@ -96,7 +96,7 @@ uses Cloudmailin to receive emails that you send. Cloudmailin parses the email
 and POSTs it to /emails.
 
 2. Sending a POST to /jobs/send will send you an email asking how your day
-went. It uses Sendgrid to send the email and it uses Heroku's Scheduler addon
+went. It uses Mailgun to send the email and it uses Heroku's Scheduler addon
 to trigger the send once a day.
 
 3. Loading / in a browser will show you all your previous entries ordered by

@@ -1,8 +1,6 @@
-const async = require('async'),
-    express = require('express'),
+const express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
-    busboy = require('connect-busboy'),
     jwt = require('jsonwebtoken'),
     _ = require('underscore'),
     moment = require('moment'),
@@ -14,8 +12,6 @@ const async = require('async'),
     { Pool } = require('pg');
 
 const config = {
-    sendgridUsername: process.env.SENDGRID_USERNAME,
-    sendgridPassword: process.env.SENDGRID_PASSWORD,
     cloudmailinForwardAddress: process.env.CLOUDMAILIN_FORWARD_ADDRESS,
     jwtSecret: process.env.JWT_SECRET || process.env.DATABASE_URL,
     name : process.env.NAME,
@@ -28,7 +24,19 @@ const db = new Pool({
   ssl: true,
 });
 
-const sendgrid = require('sendgrid')(config.sendgridUsername, config.sendgridPassword);
+const nodemailer = require('nodemailer');
+const mg = require('nodemailer-mailgun-transport');
+const auth = {
+    auth: {
+        api_key: process.env.MAILGUN_API_KEY,
+        domain: process.env.MAILGUN_DOMAIN,
+    },
+}
+const nodemailerMailgun = nodemailer.createTransport(mg(auth));
+
+function createBasicAuth(username, password) {
+    return 'Basic ' + Buffer.from(username + ':' + password).toString('base64');
+}
 
 const app = express();
 
@@ -38,16 +46,7 @@ app.set('view engine', 'hjs');
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(busboy({
-    immediate : true,
-    limits : {
-        files : -1,
-        fileSize : -1
-    }
-}));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/pkgs', express.static(path.join(__dirname, '/bower_components')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 /**
  * Convert app.render to an async function for use in async routes.
@@ -110,30 +109,25 @@ app.get('/', async function(req, res, next) {
         });
     }
     catch (err) {
-        next(err);
+        return next(err);
     }
 });
 
-app.post('/emails', function(req, res, next) {
-    const fields = {};
-    req.busboy.on('field', function(field, value) {
-        fields[field] = value;
-    });
-    req.busboy.on('finish', function() {
-        if (!fields.plain) {
+app.post('/emails', async function(req, res, next) {
+    try {
+        if (!req.body.plain) {
             return res.status(404).end();
         }
         const doc = {
             createdat : new Date(),
-            text : email.extractEmailText(fields.plain)
+            text : email.extractEmailText(req.body.plain)
         };
-        createEntry(doc, function(err) {
-            if (err) {
-                return next(err);
-            }
-            res.status(200).end();
-        });
-    });
+        await createEntry(doc);
+        res.status(200).end();
+    }
+    catch (err) {
+        return next(err);
+    }
 });
 
 app.post('/jobs/send', async function(req, res, next) {
@@ -172,22 +166,18 @@ app.post('/jobs/send', async function(req, res, next) {
         }
         const bodyHtml = await render('email-body-html', bodyHtmlParams);
 
-        sendgrid.send({
-            to: config.email,
-            toname: config.name,
-            from: config.cloudmailinForwardAddress,
-            fromname: 'WhoaLife',
+        await nodemailerMailgun.sendMail({
+            from: `"WhoaLife" <${config.cloudmailinForwardAddress}>`,
+            to: `"${config.name}" <${config.email}>`,
             subject: subject,
             text: body,
-            html : bodyHtml
-        }, function(err, json) {
-            if (err) {
-                return next(err);
-            }
-            res.status(200).end();
+            html: bodyHtml
         });
+
+        res.status(200).end();
     }
     catch (err) {
+        console.log(err);
         return next(err);
     }
 });
@@ -214,14 +204,8 @@ async function getEntries() {
     return (await db.query('select * from entries order by createdat desc')).rows;
 }
 
-function createEntry(entry, callback) {
-    db.query('insert into entries (createdat, text) values ($1, $2)', [entry.createdat, entry.text], function(err, res) {
-        if (err) {
-            return callback(err);
-        }
-
-        return callback(null, res.rows);
-    });
+async function createEntry(entry) {
+    return (await db.query('insert into entries (createdat, text) values ($1, $2)', [entry.createdat, entry.text])).rows;
 }
 
 function capitalize(str) {
