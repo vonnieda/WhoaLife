@@ -49,7 +49,7 @@ the below. You'll need those URLs for the next two tasks.
     
         Cloudmailin Target URL: https://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@whoalife.herokuapp.com/emails
     
-4. On your Heroku dashboard open the Scheduler addon.
+5. On your Heroku dashboard open the Scheduler addon.
 
     In the resulting dashboard, add a once daily task using the "Scheduler Send
     Mail Command" that you saw in your logs. It should look something like:
@@ -68,7 +68,7 @@ the below. You'll need those URLs for the next two tasks.
 
     Set the POST Format to JSON Format.
     
-6. There is no step 6! Wasn't that easy?
+7. There is no step 7! Wasn't that easy?
     
     You should receive an email at the time you specified in your scheduler and
     from there you can just follow the instructions. If you ever want to see
