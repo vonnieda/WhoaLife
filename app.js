@@ -12,8 +12,6 @@ const express = require('express'),
     { Pool } = require('pg');
 
 const config = {
-    sendgridUsername: process.env.SENDGRID_USERNAME,
-    sendgridPassword: process.env.SENDGRID_PASSWORD,
     cloudmailinForwardAddress: process.env.CLOUDMAILIN_FORWARD_ADDRESS,
     jwtSecret: process.env.JWT_SECRET || process.env.DATABASE_URL,
     name : process.env.NAME,
@@ -26,7 +24,19 @@ const db = new Pool({
   ssl: true,
 });
 
-const sendgrid = require('sendgrid')(config.sendgridUsername, config.sendgridPassword);
+const nodemailer = require('nodemailer');
+const mg = require('nodemailer-mailgun-transport');
+const auth = {
+    auth: {
+        api_key: process.env.MAILGUN_API_KEY,
+        domain: process.env.MAILGUN_DOMAIN,
+    },
+}
+const nodemailerMailgun = nodemailer.createTransport(mg(auth));
+
+function createBasicAuth(username, password) {
+    return 'Basic ' + Buffer.from(username + ':' + password).toString('base64');
+}
 
 const app = express();
 
@@ -156,22 +166,18 @@ app.post('/jobs/send', async function(req, res, next) {
         }
         const bodyHtml = await render('email-body-html', bodyHtmlParams);
 
-        sendgrid.send({
-            to: config.email,
-            toname: config.name,
-            from: config.cloudmailinForwardAddress,
-            fromname: 'WhoaLife',
+        await nodemailerMailgun.sendMail({
+            from: `"WhoaLife" <${config.cloudmailinForwardAddress}>`,
+            to: `"${config.name}" <${config.email}>`,
             subject: subject,
             text: body,
-            html : bodyHtml
-        }, function(err, json) {
-            if (err) {
-                return next(err);
-            }
-            res.status(200).end();
+            html: bodyHtml
         });
+
+        res.status(200).end();
     }
     catch (err) {
+        console.log(err);
         return next(err);
     }
 });
