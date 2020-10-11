@@ -8,7 +8,6 @@ const express = require('express'),
     path = require('path'),
     URL = require('url'),
     basicAuth = require('basic-auth'),
-    email = require('./lib/email'),
     { Pool } = require('pg');
 
 const config = {
@@ -115,12 +114,12 @@ app.get('/', async function(req, res, next) {
 
 app.post('/emails', async function(req, res, next) {
     try {
-        if (!req.body.plain) {
+        if (!req.body.reply_plain) {
             return res.status(404).end();
         }
         const doc = {
             createdat : new Date(),
-            text : email.extractEmailText(req.body.plain)
+            text : req.body.reply_plain.trim()
         };
         await createEntry(doc);
         res.status(200).end();
