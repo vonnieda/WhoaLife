@@ -70,10 +70,12 @@ the below. You'll need those URLs for the next two tasks.
 
 7. On your Heroku app dashboard's Resources tab, open the Mailgun addon.
 
-    In the resulting dashboard, select the Sending menu, and within that select the
-    Overview menu. Here, you'll find an *Authorized Recipients* dialog; enter in the
-    email address you want mails to be sent to, and click "Save Recipient". Mailgun
-    will then send a confirmation email to that address, so be sure to approve that.
+    In the resulting dashboard, select the *Sending* menu, and within that select the
+    *Overview* menu. Here, you'll find an *Authorized Recipients* dialog; enter in the
+    email address you want mails to be sent to, and click "Save Recipient".
+
+    Mailgun will then send a confirmation email to that address, so be sure to approve
+    that. This will allow Mailgun to actually send you emails.
 
 8. There is no step 8! Wasn't that easy?
     
