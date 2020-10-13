@@ -49,7 +49,7 @@ the below. You'll need those URLs for the next two tasks.
     
         Cloudmailin Target URL: https://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@whoalife.herokuapp.com/emails
     
-5. On your Heroku dashboard open the Scheduler addon.
+5. On your Heroku app dashboard's Resources tab, open the Scheduler addon.
 
     In the resulting dashboard, add a once daily task using the "Scheduler Send
     Mail Command" that you saw in your logs. It should look something like:
@@ -59,16 +59,25 @@ the below. You'll need those URLs for the next two tasks.
     You should set the time of the task to run when you'd like to receive your
     email. Make sure you take timezone into account.
 
-5. On your Heroku dashboard open the Cloudmailin addon.
+6. On your Heroku app dashboard's Resources tab, open the Cloudmailin addon.
 
     In the resulting dashboard, click Edit Target and then add the "Cloudmailin
     Target URL" that you saw in your logs. It should look something like:
     
         https://a:eyJ0eXAi98132749128374hbGciOiJIUzI1NiJ9.eyJpYXQi981273918723NDZ9.8fzBdgMY9o7OOe9So1981273918723E5GLRiLg7fzI@whoalife.herokuapp.com/emails
 
-    Set the POST Format to JSON Format.
-    
-7. There is no step 7! Wasn't that easy?
+    Set the POST Format to "JSON Format (older)".
+
+7. On your Heroku app dashboard's Resources tab, open the Mailgun addon.
+
+    In the resulting dashboard, select the *Sending* menu, and within that select the
+    *Overview* menu. Here, you'll find an *Authorized Recipients* dialog; enter in the
+    email address you want mails to be sent to, and click "Save Recipient".
+
+    Mailgun will then send a confirmation email to that address, so be sure to approve
+    that. This will allow Mailgun to actually send you emails.
+
+8. There is no step 8! Wasn't that easy?
     
     You should receive an email at the time you specified in your scheduler and
     from there you can just follow the instructions. If you ever want to see
